@@ -17,7 +17,7 @@
 
 #### Properties
 
-Animate `transform` and `opacity` where you can. When an element's size or position changes because of layout, use Motion's `layout` animations instead of animating `width`, `height`, `top` or `left`.
+Prefer `transform`, `opacity`, `clipPath` and `filter` where possible as these are hardware accelerated. If independent transforms need animating separately or you need to use motion values prefer `x`, `y`, `rotate` etc. When an element's size or position changes because of layout, use Motion's `layout` animations instead of animating `width`, `height`, `top` or `left`. 
 
 #### Execution speed
 
