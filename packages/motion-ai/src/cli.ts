@@ -13,7 +13,7 @@ import {
 } from "@clack/prompts"
 import { createRequire } from "node:module"
 import { homedir } from "node:os"
-import { AGENTS, normalizeFolder } from "./agents.js"
+import { AGENTS, normalizeFolder, skillsDirFor } from "./agents.js"
 import {
     baseDir,
     configureMcp,
@@ -115,7 +115,7 @@ async function main(): Promise<void> {
             : "MCP"
     )
 
-    const lines = folders.map((f) => `✓ skills → ${f}/skills/`)
+    const lines = folders.map((f) => `✓ skills → ${skillsDirFor(f)}/skills/`)
     for (const extra of extras) lines.push(`✓ ${extra}`)
     for (const label of mcp.configured) lines.push(`✓ MCP → ${label}`)
     note(lines.join("\n"), "Installed")

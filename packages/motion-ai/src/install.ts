@@ -3,7 +3,7 @@ import { homedir } from "node:os"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { upsertServer } from "add-mcp"
-import { AGENTS } from "./agents.js"
+import { AGENTS, skillsDirFor } from "./agents.js"
 
 export type Scope = "project" | "global"
 
@@ -30,8 +30,9 @@ export function writeSkills(base: string, folders: string[]): string[] {
     const skillsDir = join(CONTENT_DIR, "skills")
     const skills = readdirSync(skillsDir)
     for (const folder of folders) {
+        const targetFolder = skillsDirFor(folder)
         for (const skill of skills) {
-            const dest = join(base, folder, "skills", skill)
+            const dest = join(base, targetFolder, "skills", skill)
             mkdirSync(dirname(dest), { recursive: true })
             cpSync(join(skillsDir, skill), dest, { recursive: true })
         }

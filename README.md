@@ -42,7 +42,7 @@ In Cursor, open **Customize** from the sidebar, search the marketplace for **Mot
 npx motion-ai
 ```
 
-Installs the Motion skills and configures both hosted MCP servers for Claude Code, Amp, OpenCode, Gemini CLI, Copilot or any custom agent folder. No API key: Motion+ features unlock by signing in from your agent.
+Installs the Motion skills and configures both hosted MCP servers for Claude Code, Codex, Amp, OpenCode, Gemini CLI, Copilot or any custom agent folder. For Codex, skills install to `.agents/skills/` and MCP configuration to `.codex/config.toml`. No API key: Motion+ features unlock by signing in from your agent.
 
 ## Motion+
 
