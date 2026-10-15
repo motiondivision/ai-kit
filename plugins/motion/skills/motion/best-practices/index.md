@@ -17,7 +17,7 @@
 
 #### Properties
 
-Prefer `transform`, `opacity`, `clipPath` and `filter` where possible as these are hardware accelerated. If independent transforms need animating separately or you need to use motion values prefer `x`, `y`, `rotate` etc. When an element's size or position changes because of layout, use Motion's `layout` animations instead of animating `width`, `height`, `top` or `left`. 
+Prefer transforms (`transform` or independent transforms like `x`, `y`, `scale`, `rotate`), `opacity`, `clipPath` and `filter` where possible as these are hardware accelerated. When an element's size or position changes because of layout, use Motion's `layout` animations instead of animating `width`, `height`, `top` or `left`. 
 
 #### Execution speed
 
@@ -41,13 +41,12 @@ animate(element, { scale: 2 })
 <motion.div animate={{ scale: 2 }} />
 ```
 
-Prefer `transform` as these animations will run via WAAPI. Use independent transforms when:
+Both are hardware accelerated on HTML elements. Prefer independent transforms when:
 
 -   Some transforms have different transition settings
 -   Some transforms need to be passed in as motion values
-    Note: Passing `transform` in as a motion value will also disable WAAPI animations, so no need to prefer it if you would resort to this.
 -   Defining transforms via `style` prop
--   Use independent transforms when you have competing/composable transforms:
+-   You have competing/composable transforms:
 
 ```javascript
 animate(element, { x: 100 })
@@ -62,11 +61,13 @@ hover(() => {
 <motion.div animate={{ x: 100 }} whileHover={{ scale: 1.2 }} />
 ```
 
+Accelerated animations are de-optimised to the main thread when they use `onUpdate` (prop or transition option), `transformTemplate`, `type: "inertia"`, layout animations, on SVG elements, or when a transform motion value is set every frame (drag, `useMotionValue` streams). Don't change working code to avoid these, they still perform well.
+
 #### will-change
 
-When animating with CSS `transition` or Motion independent transforms `x`, `y`, `scale` etc, set `will-change` on the animating properties so the browser promotes the element to its own compositor layer. Use it sparingly and remove it once the animation finishes.
+When animating transforms, `opacity`, `clipPath` or `filter`, and it will de-opt according to rules above, set `will-change` on the animating properties so the browser promotes the element to its own compositor layer. Use it sparingly and remove it once the animation finishes.
 
-When animating with CSS `animation` or Motion via `transform`, this is unnecessary — the layer is promoted automatically by the browser.
+When animating with CSS `animation` or a hardware-accelerated Motion animation (`transform`, `x`, `scale` etc), this is unnecessary — the layer is promoted automatically by the browser.
 
 ### Design
 
