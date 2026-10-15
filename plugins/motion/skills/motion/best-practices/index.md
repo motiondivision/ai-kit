@@ -61,11 +61,11 @@ hover(() => {
 <motion.div animate={{ x: 100 }} whileHover={{ scale: 1.2 }} />
 ```
 
-Transform animations run on the main thread when they use `onUpdate` (prop or transition option), `transformTemplate`, `type: "inertia"`, scroll-linked or layout animations, on SVG elements, or when a transform motion value is set every frame (drag, `useMotionValue` streams). Don't change working code to avoid these, they still perform well.
+Accelerated animations are de-optimised to the main thread when they use `onUpdate` (prop or transition option), `transformTemplate`, `type: "inertia"`, layout animations, on SVG elements, or when a transform motion value is set every frame (drag, `useMotionValue` streams). Don't change working code to avoid these, they still perform well.
 
 #### will-change
 
-When animating with CSS `transition`, or a Motion transform animation that runs on the main thread (see above), set `will-change` on the animating properties so the browser promotes the element to its own compositor layer. Use it sparingly and remove it once the animation finishes.
+When animating transforms, `opacity`, `clipPath` or `filter`, and it will de-opt according to rules above, set `will-change` on the animating properties so the browser promotes the element to its own compositor layer. Use it sparingly and remove it once the animation finishes.
 
 When animating with CSS `animation` or a hardware-accelerated Motion animation (`transform`, `x`, `scale` etc), this is unnecessary — the layer is promoted automatically by the browser.
 
