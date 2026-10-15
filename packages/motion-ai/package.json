@@ -1,6 +1,6 @@
 {
   "name": "motion-ai",
-  "version": "14.1.0",
+  "version": "14.2.0",
   "description": "Install the Motion AI Kit — installs Motion skills into your AI coding agents and configures Motion's hosted MCP servers.",
   "author": {
     "name": "Matt Perry",
