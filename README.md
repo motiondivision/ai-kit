@@ -10,7 +10,7 @@ Motion AI Kit is a suite of animation tools to help agents write production-grad
 
 **Animation best practices:** Hand-written advice by the creator of Motion for taste and technical best practices.
 
-**The best Motion context:** The full and latest Motion documentation is made available for your agent to search. [Motion+](https://motion.dev/plus) members gain additional access to search the source code of 450+ Motion Examples and Motion UI components.
+**The best Motion context:** The full and latest Motion documentation is made available for your agent to search. [Motion+](https://motion.dev/plus) members gain additional access to search the source code of 500+ Motion Examples and Motion UI components.
 
 **CSS spring generation:** Use Motion to generate spring animations for CSS via the `linear()` easing.
 
@@ -46,7 +46,7 @@ Installs the Motion skills and configures both hosted MCP servers for Claude Cod
 
 ## Motion+
 
-**[Motion+](https://motion.dev/plus)** adds MotionScore performance audits, the ability to search early access and Motion+ API documentation, plus source code for 450+ Motion Examples and Motion UI components. Plus, an experimental visual editor for tuning transitions against a live preview and then applying via your agent.
+**[Motion+](https://motion.dev/plus)** adds MotionScore performance audits, the ability to search early access and Motion+ API documentation, plus source code for 500+ Motion Examples and Motion UI components. Plus, an experimental visual editor for tuning transitions against a live preview and then applying via your agent.
 
 Ask Cursor to sign you in and it hands you a link. Nothing gets pasted into
 chat.
