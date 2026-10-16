@@ -7,6 +7,19 @@
     "url": "https://motion.dev"
   },
   "license": "MIT",
+  "homepage": "https://motion.dev/ai-kit",
+  "keywords": [
+    "motion",
+    "animation",
+    "ai",
+    "agent",
+    "mcp",
+    "skills",
+    "claude-code",
+    "cursor",
+    "codex",
+    "performance"
+  ],
   "repository": "https://github.com/motiondivision/ai-kit",
   "type": "module",
   "bin": "./dist/cli.js",
