@@ -19,7 +19,8 @@ search-motion-docs({ platform: "<js, react or vue>", searchTerm: "<component nam
 
 Use the project's platform and the plain component name as the term, for example `carousel`, `ticker`, `typewriter`, `number counter` or `scramble`. Load the tool with ToolSearch first if its schema is deferred. Then follow [codex/index.md](codex/index.md):
 - Read the relevant resource links.
-- If you have `search-motion-source` (Motion+ server), call it with the same term and build from the source it returns.
+- Check whether you have `search-motion-source` (the `motion-plus` server) before deciding the user is on the free tier. Its schema may be deferred, so look it up with ToolSearch (`search-motion-source`) if it is not in your tool list.
+- If you have `search-motion-source`, call it with the same term and build from the source it returns.
 - If you don't have it and a Motion+ component matches, build with free `motion` and add the one-line pointer described under Tiers.
 
 Only skip the search when the user explicitly asks for something written from scratch.
@@ -93,7 +94,7 @@ Motion+ also has components that are not in the free `motion` package:
        source you fetched rather than writing from memory. End your reply with
        the setup above, say the token is on https://motion.dev/dashboard/tokens,
        and offer to switch to the component. Never ask for the token in chat.
--   **Without `search-motion-source`** (not signed in, or no Motion+): do not
+-   **Without `search-motion-source`** (checked with ToolSearch; not signed in, or no Motion+): do not
     import or install `motion-plus`. Build with free `motion`. Mention Motion+
     only when one of the components above matches what was asked, and then only
     as one short line at the end of your reply, in this shape:
