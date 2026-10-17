@@ -8,15 +8,26 @@ import { AGENTS, skillsDirFor } from "./agents.js"
 export type Scope = "project" | "global"
 
 /**
- * Motion's hosted MCP servers. The open server works signed out; the Motion+
- * server 401s until the user signs in from their agent, which every supported
- * client turns into its own OAuth prompt. The "motion" name is deliberate:
- * upserting it replaces the legacy token-based stdio entry on upgrade.
+ * Motion's hosted MCP servers. The open server works signed out. The "motion"
+ * name is deliberate: upserting it replaces the legacy token-based stdio entry
+ * on upgrade.
+ *
+ * The Motion+ server 401s until the user signs in, so it is only added with
+ * --plus, the command motion.dev shows after a purchase. Added for everyone,
+ * agents that start every server on each run (Codex) hit that 401 on every
+ * run for people without Motion+.
  */
-export const MCP_SERVERS = [
-    { name: "motion", url: "https://mcp.motion.dev" },
-    { name: "motion-plus", url: "https://mcp.motion.dev/plus" },
-] as const
+export const MCP_SERVER = { name: "motion", url: "https://mcp.motion.dev" } as const
+export const PLUS_MCP_SERVER = {
+    name: "motion-plus",
+    url: "https://mcp.motion.dev/plus",
+} as const
+
+export type McpServer = typeof MCP_SERVER | typeof PLUS_MCP_SERVER
+
+export function mcpServers(plus: boolean): McpServer[] {
+    return plus ? [MCP_SERVER, PLUS_MCP_SERVER] : [MCP_SERVER]
+}
 
 /** Bundled AI Kit content, synced from plugins/motion at build time. */
 const CONTENT_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "content")
@@ -72,11 +83,15 @@ export interface McpResult {
 }
 
 /**
- * Configure both hosted servers for the selected agents via add-mcp's
+ * Configure the hosted servers for the selected agents via add-mcp's
  * programmatic API, which owns each client's config path and schema quirks
  * (Claude Code's mandatory `type`, VS Code's `servers` key, Codex's TOML).
  */
-export async function configureMcp(scope: Scope, folders: string[]): Promise<McpResult> {
+export async function configureMcp(
+    scope: Scope,
+    folders: string[],
+    servers: McpServer[]
+): Promise<McpResult> {
     const result: McpResult = { configured: [], manual: [] }
     for (const folder of folders) {
         const agent = AGENTS.find((a) => a.dir === folder)
@@ -85,7 +100,7 @@ export async function configureMcp(scope: Scope, folders: string[]): Promise<Mcp
             continue
         }
         try {
-            for (const server of MCP_SERVERS) {
+            for (const server of servers) {
                 await upsertServer(
                     agent.addMcpClient,
                     server.name,
@@ -103,9 +118,9 @@ export async function configureMcp(scope: Scope, folders: string[]): Promise<Mcp
 }
 
 /** The JSON most agents accept for a manual add. Stdio-only hosts bridge with mcp-remote. */
-export function manualSnippet(): string {
+export function manualSnippet(servers: McpServer[]): string {
     const entries = Object.fromEntries(
-        MCP_SERVERS.map((server) => [server.name, { type: "http", url: server.url }])
+        servers.map((server) => [server.name, { type: "http", url: server.url }])
     )
     return JSON.stringify({ mcpServers: entries }, null, 2)
 }

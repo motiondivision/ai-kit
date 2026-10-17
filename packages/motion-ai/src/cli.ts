@@ -18,7 +18,7 @@ import {
     baseDir,
     configureMcp,
     manualSnippet,
-    MCP_SERVERS,
+    mcpServers,
     writeAgentExtras,
     writeSkills,
     type Scope,
@@ -32,14 +32,16 @@ function bail(message = "Cancelled."): never {
 }
 
 async function main(): Promise<void> {
-    const arg = process.argv[2]
-    if (arg === "--version" || arg === "-v") return console.log(VERSION)
-    if (arg === "--help" || arg === "-h") {
+    const args = process.argv.slice(2)
+    if (args.includes("--version") || args.includes("-v")) return console.log(VERSION)
+    if (args.includes("--help") || args.includes("-h")) {
         console.log(
-            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP servers) into your AI agents.\n\nUsage:  npx motion-ai\n\nNo API key needed. Motion+ features unlock by signing in to the motion-plus\nMCP server from your agent.`
+            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP server) into your AI agents.\n\nUsage:  npx motion-ai           skills + the free Motion MCP server\n        npx motion-ai --plus    also add the Motion+ MCP server (Motion+ members)\n\nNo API key needed. After adding the Motion+ server, sign in to motion-plus\nfrom your agent's MCP menu.`
         )
         return
     }
+    const plus = args.includes("--plus")
+    const servers = mcpServers(plus)
 
     if (!process.stdin.isTTY) {
         console.error("motion-ai is interactive — run it in a terminal.")
@@ -92,7 +94,7 @@ async function main(): Promise<void> {
             `Scope    ${scope as string}  →  ${base}`,
             `Agents   ${folders.join("  ")}`,
             `Skills   install the Motion AI Kit skills`,
-            `MCP      ${MCP_SERVERS.map((s) => s.name).join(" + ")} (hosted — no API key)`,
+            `MCP      ${servers.map((s) => s.name).join(" + ")} (hosted — no API key)`,
         ].join("\n"),
         "Review"
     )
@@ -108,7 +110,7 @@ async function main(): Promise<void> {
 
     const sp2 = spinner()
     sp2.start("Configuring MCP servers")
-    const mcp = await configureMcp(scope as Scope, folders)
+    const mcp = await configureMcp(scope as Scope, folders, servers)
     sp2.stop(
         mcp.configured.length
             ? `MCP configured for ${mcp.configured.length} agent(s)`
@@ -124,11 +126,13 @@ async function main(): Promise<void> {
         const head = mcp.error
             ? `MCP setup failed for ${mcp.manual.join(", ")} (${mcp.error.split("\n")[0]}). Add the servers manually:`
             : `${mcp.manual.join(", ")} — add the MCP servers manually (the exact format varies by tool; stdio-only hosts can bridge with \`npx -y mcp-remote <url>\`):`
-        note(`${head}\n\n${manualSnippet()}`, "Add MCP manually")
+        note(`${head}\n\n${manualSnippet(servers)}`, "Add MCP manually")
     }
 
     outro(
-        "Done. Run /motion in your agent — sign in to motion-plus from its MCP menu for Motion+ access."
+        plus
+            ? "Done. Run /motion in your agent, then sign in to motion-plus from its MCP menu."
+            : "Done. Run /motion in your agent. Motion+ members: run npx motion-ai --plus to add the Motion+ server."
     )
 }
 
