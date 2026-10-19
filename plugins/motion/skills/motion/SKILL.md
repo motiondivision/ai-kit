@@ -25,6 +25,19 @@ Use the project's platform and the plain component name as the term, for example
 
 Only skip the search when the user explicitly asks for something written from scratch.
 
+Which tier you're on: check your tool list (including deferred tools) for `mcp__motion-plus__search-motion-source`. If it's there, you're working for a Motion+ member: call it, even when `search-motion-docs` has already answered. Load it with ToolSearch if it's deferred.
+
+## Quality bar for every animated component
+
+Ship these by default. The user shouldn't have to ask.
+
+1. **Reduced motion.** Wrap the app (or the component) in `<MotionConfig reducedMotion="user">`. Any loop you drive yourself (`useAnimationFrame`, `setInterval` typing or scrambling, `animate` with `repeat: Infinity`) must check `useReducedMotion()` and render the finished state instead. CSS animations need a `@media (prefers-reduced-motion: reduce)` override.
+2. **Accessible text effects.** For typewriter, scramble, split or counting text, put the final text in a visually hidden element and mark the animating glyphs `aria-hidden`. Don't put `aria-label` on a plain `div` or `span`, because it's ignored and flagged. Give it a role, or use the hidden-text pattern.
+3. **Keyboard.** Carousels and sliders move with the arrow keys when focused. Every slide or item is focusable: wrap it in a link or button, or give it `tabIndex={0}`. With Motion+ `Carousel`, its keyboard navigation moves between focusable items, so plain `div` items can't be reached. Controls are real `<button>`s with an `aria-label` and a visible focus style.
+4. **Performance.** Animate only `transform` and `opacity` (plus `filter` and `clip-path` where needed). Never read layout (`getBoundingClientRect`, `offsetWidth`, `scrollWidth`) inside an animation frame: measure once, and again on resize. Drive per-frame values with motion values, not React state. Stop text effects once they finish, rather than looping forever, unless a loop was asked for.
+5. **Layout.** Nothing may widen the page. When a ticker or carousel bleeds to the viewport edge (for example `Ticker`'s `overflow` prop), clip horizontal overflow on an ancestor with `overflow-x: clip`. Not `hidden`, which still lets the page scroll sideways.
+6. **Contrast.** Text and controls need at least 4.5:1 contrast against their background, including muted labels on dark gradients.
+
 -   [Animation best practices](best-practices/index.md): "Animate this button", "Fade this layer in", "Animate this Vue component". Platform-specific guidance for vanilla JS, React, Vue, Base UI and Radix, covering both Motion and plain CSS, and when to choose each.
 -   [Documentation, examples and Motion UI search](codex/index.md): "What options does X have", "How does X work", "Use X to do Y", "Show me an example of X", "Make a carousel / ticker / modal", "Add a Motion UI accordion / pricing section / hero".
 -   [CSS spring and bounce generation](css-spring/index.md): "Generate a CSS spring with a bounce of 0.5 over 0.3s", "Make this bouncier", "Give me a bounce easing".
