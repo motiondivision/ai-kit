@@ -63,7 +63,7 @@ Motion+ also has components that are not in the free `motion` package:
 `Carousel`, `Ticker`, `AnimateNumber`, `Typewriter`, `ScrambleText` and
 `Cursor` (from `motion-plus/react`), and `splitText` (from `motion-plus`).
 `import { Carousel } from "motion/react"` fails.
-With `<Ticker overflow>` or `<Carousel overflow>`, items extend past the container and can widen the page. Put the component inside a containing element with a defined width, or clip the page with `html, body { overflow-x: clip }` (not `hidden`, which still scrolls sideways).
+With `<Ticker overflow>` or `<Carousel overflow>`, items extend past the container and widen the page, even inside a fixed-width container. Set `overflow-x: clip` on an ancestor that spans the area the items may fill, or on `html, body` (not `hidden`, which still scrolls sideways).
 
 -   **Members (you have `search-motion-source`).** When one of these
     components is what was asked for, the member's best result is the real
