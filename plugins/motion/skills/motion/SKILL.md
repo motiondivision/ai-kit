@@ -43,7 +43,8 @@ rest is tiered, and the tools say so when you reach them:
     server, signed in from the editor's MCP settings.
 -   **Motion+**: **MotionScore audits** — the methodology
     (`motion://skills/performance-audit`) that static audits read before
-    grading, and the history that runtime reports save into — plus
+    grading, the history that runtime reports save into and the
+    Performance Doctor report card with a Fix button on each finding — plus
     example and Motion UI **source code** (`search-motion-source`),
     the Motion+ sections of the documentation, and the visual transition
     editor. These live on a second MCP server, **Motion+**, which the editor

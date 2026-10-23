@@ -37,7 +37,13 @@ files to be graded.
    that no practical upgrade exists.
 5. Return the findings in the methodology's report format. Nothing else — your
    output is data for the main agent to merge with other areas, not a message
-   to the user.
+   to the user. For each finding, include what the report card needs: grade,
+   upgrade grade, a short title, file and line, one sentence each for what,
+   why and fix, and an example change of at most 8 lines. List the animations
+   that pass with their file and grade.
+6. Do not call `open-performance-report` or make fixes yourself. The main
+   agent merges every area into one report card and handles the Fix
+   requests, because they arrive in its chat.
 
 ## Voice
 

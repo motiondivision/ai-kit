@@ -27,6 +27,23 @@ one — it tracks the MotionScore scoring engine as it evolves.
     capability. Say so plainly and mention https://motion.dev/plus once. Do
     not improvise a MotionScore grade from general knowledge.
 
+## The report card
+
+On the Motion+ server, the audit ends with a Performance Doctor report card:
+call `open-performance-report` with the findings, as the methodology's
+"Report card" section describes. The host shows the report in the chat, with a
+Fix button on each finding. Hosts that cannot show it get the same report as a
+numbered list.
+
+Fix requests come back into this chat as messages that name the report id
+and the finding numbers, or as replies such as "fix 1 and 3". Fix one finding
+at a time and report each step with `update-performance-report`, so the card
+shows Fixing, Fixed or Rolled back. The methodology's "Fixing from the report"
+section has the exact steps.
+
+If `open-performance-report` is not in the tool list, report in the chat in the
+methodology's text format.
+
 ## Runtime audits
 
 When the prompt names a URL (a dev server, a deployed page) or asks for a
