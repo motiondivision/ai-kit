@@ -41,6 +41,13 @@ at a time and report each step with `update-performance-report`, so the card
 shows Fixing, Fixed or Rolled back. The methodology's "Fixing from the report"
 section has the exact steps.
 
+When the request asks to fix, not only to audit ("fix animation performance
+on the homepage", "make these animations faster"), audit first, open the
+report card, then fix every finding straight away, worst first, as if the
+user had pressed Fix all. The card shows each one move through Fixing to
+Fixed or Rolled back. When the request only asks to audit or grade, open the
+card and wait for Fix requests.
+
 If `open-performance-report` is not in the tool list, report in the chat in the
 methodology's text format.
 
