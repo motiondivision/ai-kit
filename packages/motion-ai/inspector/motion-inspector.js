@@ -215,6 +215,8 @@
         held.set(entry, {
             state,
             value: isLive(entry) ? undefined : entry.motionValue?.get(),
+            // A JS animation's time leaves out its delay once it has ticked
+            time: isNative(animation) ? 0 : animation.time + entry.delay,
         })
         if (state === "running") animation.pause()
     }
@@ -310,13 +312,20 @@
             } else {
                 animation.play()
             }
-        } else if (touched && live.kind !== "layout") {
+        } else if (touched) {
             // Finished or stopped: back to the value it left
-            if (isNative(animation)) animation.animation.cancel()
-            if (saved.value !== undefined) {
-                live.motionValue.set(saved.value)
-            } else if (!isNative(animation) && saved.state === "finished") {
-                animation.time = endOf(live)
+            if (isNative(animation)) {
+                animation.animation.cancel()
+                // An earlier JS animation may have rendered over its style
+                if (saved.value !== undefined) live.motionValue.set(saved.value)
+            } else {
+                /**
+                 * Ticking it there also calls its onUpdate. A layout
+                 * animation's progress at its end puts the element where it
+                 * is now.
+                 */
+                animation.time =
+                    live.kind === "layout" ? endOf(live) : saved.time
             }
         }
     }

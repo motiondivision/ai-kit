@@ -246,6 +246,27 @@ describe("motion inspector", () => {
         close(await page.evaluate(() => MotionInspector.duration()), 2.5, 0.01, "duration")
     })
 
+    test("play() puts back a stopped animation that only calls onUpdate", async () => {
+        await page.evaluate(() => {
+            window.latest = 0
+            window.stopped = Motion.animate(0, 100, {
+                duration: 1,
+                ease: "linear",
+                onUpdate: (v) => (latest = v),
+            })
+        })
+        await wait(500)
+        const before = await page.evaluate(() => {
+            stopped.stop()
+            return latest
+        })
+        await page.evaluate(() => MotionInspector.seek(0.1))
+        close(await page.evaluate(() => latest), 10, 1, "seeked")
+        await page.evaluate(() => MotionInspector.play())
+        await wait(100)
+        close(await page.evaluate(() => latest), before, 0.5, "restored")
+    })
+
     test("calls a hook that was already installed", async () => {
         const other = await browser.newPage()
         await other.addInitScript(() => {
@@ -300,6 +321,16 @@ describe("motion inspector with motion/react", () => {
         await page.evaluate(() => MotionInspector.play())
         await wait(1200)
         close(await page.evaluate(() => leftOf("#slider")), 400, 0, "finished")
+    })
+
+    test("play() puts a finished layout animation back at its end", async () => {
+        await page.click("#move")
+        await wait(1200)
+        // Seeking one that has finished isn't supported, but it must recover
+        await page.evaluate(() => MotionInspector.seek(0.3))
+        await page.evaluate(() => MotionInspector.play())
+        await wait(100)
+        close(await page.evaluate(() => leftOf("#slider")), 400, 0, "restored")
     })
 
     test("lists accelerated independent transforms as browser animations", async () => {
