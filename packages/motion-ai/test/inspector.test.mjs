@@ -158,6 +158,94 @@ describe("motion inspector", () => {
         close(await page.evaluate(() => opacityOf("#box")), 0.6, 0.02, "opacity")
     })
 
+    test("play() puts back finished animations it seeked, delayed ones included", async () => {
+        await page.evaluate(() => {
+            const options = { delay: 0.5, duration: 0.5, ease: "linear" }
+            window.mv = Motion.motionValue(0)
+            Motion.animate(mv, [0, 100], options)
+            Motion.animate("#box", { x: [0, 100] }, options)
+        })
+        await wait(1200)
+        await page.evaluate(() => MotionInspector.seek(0.75))
+        close(await page.evaluate(() => mv.get()), 50, 1, "seeked value")
+        close(await page.evaluate(() => translateXOf("#box")), 50, 1, "seeked x")
+
+        await page.evaluate(() => MotionInspector.play())
+        await wait(100)
+        close(await page.evaluate(() => mv.get()), 100, 0, "restored value")
+        close(await page.evaluate(() => translateXOf("#box")), 100, 0, "restored x")
+    })
+
+    test("play() puts back the animation that replaced another", async () => {
+        await page.evaluate(() => {
+            window.mv = Motion.motionValue(0)
+            Motion.animate(mv, [0, 100], { duration: 0.3, ease: "linear" })
+        })
+        await wait(400)
+        await page.evaluate(() => {
+            Motion.animate(mv, [100, 200], { duration: 0.3, ease: "linear" })
+        })
+        await wait(400)
+        await page.evaluate(() => MotionInspector.seek(0.1))
+        close(await page.evaluate(() => mv.get()), 33.3, 1, "first animation")
+
+        await page.evaluate(() => MotionInspector.play())
+        await wait(100)
+        close(await page.evaluate(() => mv.get()), 200, 0, "restored")
+    })
+
+    test("an animation seeked past its end completes on play() rather than replaying", async () => {
+        await page.evaluate(() => MotionInspector.pause())
+        await page.evaluate(() => {
+            window.completed = 0
+            Motion.animate(
+                "#box",
+                { opacity: [0, 1] },
+                { duration: 1, ease: "linear", onComplete: () => completed++ }
+            )
+        })
+        await wait(50)
+        await page.evaluate(() => MotionInspector.seek(1.5))
+        await page.evaluate(() => MotionInspector.play())
+        await wait(150)
+        close(await page.evaluate(() => opacityOf("#box")), 1, 0, "still at its end")
+        await wait(1200)
+        assert.equal(await page.evaluate(() => completed), 1)
+    })
+
+    test("pause() after mark() still pauses animations that started before it", async () => {
+        await page.evaluate(() => {
+            Motion.animate(
+                "#other",
+                { opacity: [0, 1] },
+                { duration: 1, repeat: Infinity, ease: "linear" }
+            )
+        })
+        await wait(100)
+        await page.evaluate(() => {
+            MotionInspector.mark()
+            MotionInspector.pause()
+        })
+        // A WAAPI animation pauses on its next frame
+        await wait(50)
+        const before = await page.evaluate(() => opacityOf("#other"))
+        await wait(300)
+        close(await page.evaluate(() => opacityOf("#other")), before, 0.01, "held")
+    })
+
+    test("the timeline includes repeat delays", async () => {
+        await page.evaluate(() => MotionInspector.pause())
+        await page.evaluate(() => {
+            Motion.animate(
+                "#box",
+                { opacity: [0, 1] },
+                { duration: 0.5, repeat: 2, repeatDelay: 0.5 }
+            )
+        })
+        await wait(50)
+        close(await page.evaluate(() => MotionInspector.duration()), 2.5, 0.01, "duration")
+    })
+
     test("calls a hook that was already installed", async () => {
         const other = await browser.newPage()
         await other.addInitScript(() => {
@@ -212,6 +300,17 @@ describe("motion inspector with motion/react", () => {
         await page.evaluate(() => MotionInspector.play())
         await wait(1200)
         close(await page.evaluate(() => leftOf("#slider")), 400, 0, "finished")
+    })
+
+    test("lists accelerated independent transforms as browser animations", async () => {
+        await page.click("#shift")
+        await wait(100)
+        // The last: the first ran as the element mounted
+        const x = (await page.evaluate(() => MotionInspector.list())).findLast(
+            (a) => a.target === "div#shifter.box" && a.property === "x"
+        )
+        assert.ok(x, "x animation listed")
+        assert.equal(x.engine, "waapi")
     })
 
     test("seeks an exit animation, and AnimatePresence removes it after play()", async () => {
