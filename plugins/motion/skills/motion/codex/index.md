@@ -10,10 +10,13 @@ The plugin registers two MCP servers, and which tools you have tells you what
 you can deliver:
 
 -   **Motion** is always available, needs no account, and carries
-    `search-motion-docs` and `generate-css-easing`.
--   **Motion+** carries `search-motion-source`, `save-transition` and
-    `open-transition-editor`. Its tools appear only once the editor is signed
+    `search-motion-docs`, `insert-motion-component` and `generate-css-easing`.
+-   **Motion+** carries `search-motion-source`, `insert-motion-plus-component`,
+    `save-transition` and `open-transition-editor`. Its tools appear only once the editor is signed
     in to it *and* the account has Motion+.
+
+To add, insert, make or build a component, open the insert panel instead of
+searching: see [insert/index.md](../insert/index.md).
 
 **Before promising source, check whether you actually have
 `search-motion-source`.** If you do not, say so plainly rather than
