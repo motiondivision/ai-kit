@@ -25,7 +25,8 @@
   "bin": "./dist/cli.js",
   "files": [
     "dist",
-    "content"
+    "content",
+    "inspector"
   ],
   "engines": {
     "node": ">=18"
@@ -37,6 +38,7 @@
     "sync-content": "node scripts/sync-content.mjs",
     "build": "npm run sync-content && tsc -p .",
     "dev": "tsc -p . --watch",
+    "test": "npm run build && node --test test/*.test.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -45,6 +47,9 @@
   },
   "devDependencies": {
     "@types/node": "^26.1.2",
+    "motion": "^14.6.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.0.0"
   }
 }

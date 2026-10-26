@@ -13,7 +13,9 @@ import {
 } from "@clack/prompts"
 import { createRequire } from "node:module"
 import { homedir } from "node:os"
+import { readFileSync } from "node:fs"
 import { AGENTS, normalizeFolder, skillsDirFor } from "./agents.js"
+import { FILMSTRIP_USAGE, filmstrip, INSPECTOR_PATH } from "./filmstrip.js"
 import {
     baseDir,
     configureMcp,
@@ -33,10 +35,15 @@ function bail(message = "Cancelled."): never {
 
 async function main(): Promise<void> {
     const args = process.argv.slice(2)
+    if (args[0] === "filmstrip") return filmstrip(args.slice(1))
+    // The inspector's source, to inject with any browser tool
+    if (args[0] === "inspector") {
+        return void process.stdout.write(readFileSync(INSPECTOR_PATH, "utf8"))
+    }
     if (args.includes("--version") || args.includes("-v")) return console.log(VERSION)
     if (args.includes("--help") || args.includes("-h")) {
         console.log(
-            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP server) into your AI agents.\n\nUsage:  npx motion-ai           skills + the free Motion MCP server\n        npx motion-ai --plus    also add the Motion+ MCP server (Motion+ members)\n\nNo API key needed. After adding the Motion+ server, sign in to motion-plus\nfrom your agent's MCP menu.`
+            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP server) into your AI agents.\n\nUsage:  npx motion-ai           skills + the free Motion MCP server\n        npx motion-ai --plus    also add the Motion+ MCP server (Motion+ members)\n\nNo API key needed. After adding the Motion+ server, sign in to motion-plus\nfrom your agent's MCP menu.\n\nnpx motion-ai inspector   print the Motion inspector script, to inject into a page\n\n${FILMSTRIP_USAGE}`
         )
         return
     }

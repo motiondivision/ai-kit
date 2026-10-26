@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+            .row {
+                display: flex;
+                width: 500px;
+            }
+            .row.right {
+                justify-content: flex-end;
+            }
+            .box {
+                width: 100px;
+                height: 100px;
+                background: red;
+            }
+        </style>
+        <script src="/react.js"></script>
+        <script src="/react-dom.js"></script>
+        <script src="/framer-motion.js"></script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+            const { createElement: h, useState } = React
+            const { motion, AnimatePresence } = Motion
+            const linear = { duration: 1, ease: "linear" }
+
+            function App() {
+                const [right, setRight] = useState(false)
+                const [shown, setShown] = useState(true)
+                return h(
+                    "div",
+                    null,
+                    h(
+                        "button",
+                        { id: "move", onClick: () => setRight(!right) },
+                        "Move"
+                    ),
+                    h(
+                        "button",
+                        { id: "hide", onClick: () => setShown(!shown) },
+                        "Hide"
+                    ),
+                    h(
+                        "div",
+                        { className: right ? "row right" : "row" },
+                        h(motion.div, {
+                            id: "slider",
+                            className: "box",
+                            layout: true,
+                            transition: linear,
+                        })
+                    ),
+                    h(
+                        AnimatePresence,
+                        null,
+                        shown &&
+                            h(motion.div, {
+                                key: "toast",
+                                id: "toast",
+                                className: "box",
+                                exit: { opacity: 0 },
+                                transition: linear,
+                            })
+                    )
+                )
+            }
+
+            ReactDOM.createRoot(document.getElementById("root")).render(h(App))
+
+            window.leftOf = (selector) =>
+                document.querySelector(selector)?.getBoundingClientRect().left
+            window.opacityOf = (selector) => {
+                const element = document.querySelector(selector)
+                return element ? Number(getComputedStyle(element).opacity) : null
+            }
+        </script>
+    </body>
+</html>
