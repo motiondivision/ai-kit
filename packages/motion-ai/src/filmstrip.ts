@@ -1,7 +1,12 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
-import { createRequire } from "node:module"
+import { writeFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+import {
+    type Box,
+    captureFrames,
+    loadPlaywright,
+    writeContactSheet,
+} from "./capture.js"
 
 export const INSPECTOR_PATH = fileURLToPath(
     new URL("../inspector/motion-inspector.js", import.meta.url)
@@ -36,13 +41,6 @@ interface Options {
     duration?: number
     selector?: string
     out: string
-    width: number
-    height: number
-}
-
-interface Box {
-    x: number
-    y: number
     width: number
     height: number
 }
@@ -96,21 +94,6 @@ function parse(args: string[]): Options {
     }
 }
 
-/**
- * Playwright is optional: use the project's own copy, falling back to one
- * next to motion-ai or on NODE_PATH.
- */
-function loadPlaywright() {
-    for (const from of [join(process.cwd(), "package.json"), import.meta.url]) {
-        for (const name of ["playwright", "@playwright/test", "playwright-core"]) {
-            try {
-                return createRequire(from)(name)
-            } catch {}
-        }
-    }
-    return null
-}
-
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
 
 /**
@@ -160,22 +143,6 @@ const union = (a: Box | null, b: Box): Box => {
         width: Math.max(a.x + a.width, b.x + b.width) - x,
         height: Math.max(a.y + a.height, b.y + b.height) - y,
     }
-}
-
-function contactSheet(frames: { file: string; time: number }[]) {
-    const cells = frames
-        .map(
-            ({ file, time }) =>
-                `<figure><img src="data:image/png;base64,${readFileSync(file).toString("base64")}"><figcaption>${time.toFixed(3)}s</figcaption></figure>`
-        )
-        .join("")
-    const columns = Math.min(frames.length, 4)
-    return `<!doctype html><style>
-body{margin:0;padding:12px;background:#fff;font:12px ui-monospace,monospace;color:#333}
-main{display:grid;grid-template-columns:repeat(${columns},1fr);gap:12px}
-figure{margin:0}img{width:100%;display:block;border:1px solid #ddd}
-figcaption{padding-top:4px}
-</style><main>${cells}</main>`
 }
 
 export async function filmstrip(args: string[]): Promise<void> {
@@ -253,19 +220,12 @@ export async function filmstrip(args: string[]): Promise<void> {
             }
         }
 
-        mkdirSync(options.out, { recursive: true })
-        const frames: { file: string; time: number }[] = []
-        for (const [i, time] of times.entries()) {
-            await page.evaluate(`MotionInspector.seek(${time})`)
-            const file = join(options.out, `frame-${String(i).padStart(2, "0")}.png`)
-            await page.screenshot({ path: file, ...(clip && { clip }) })
-            frames.push({ file, time })
-        }
-
-        const sheet = await browser.newPage({ viewport: { width: 1200, height: 400 } })
-        await sheet.setContent(contactSheet(frames))
+        const frames = await captureFrames(page, times, options.out, {
+            clip,
+            seek: (time) => page.evaluate(`MotionInspector.seek(${time})`),
+        })
         const sheetFile = join(options.out, "filmstrip.png")
-        await sheet.screenshot({ path: sheetFile, fullPage: true })
+        await writeContactSheet(browser, frames, sheetFile)
 
         writeFileSync(
             join(options.out, "timeline.json"),

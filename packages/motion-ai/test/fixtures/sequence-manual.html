@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+            .box {
+                width: 100px;
+                height: 100px;
+                background: red;
+            }
+        </style>
+        <script src="/motion.js"></script>
+    </head>
+    <body>
+        <div id="a" class="box"></div>
+        <div id="b" class="box"></div>
+        <script>
+            const { animate, MotionGlobalConfig, processFrame } = Motion
+            MotionGlobalConfig.useManualTiming =
+                !location.search.includes("auto")
+            processFrame(0)
+            animate([
+                ["#a", { x: [0, 200] }, { duration: 0.5, ease: "linear" }],
+                ["#b", { opacity: [0, 1] }, { duration: 0.5, ease: "linear" }],
+            ])
+        </script>
+    </body>
+</html>
