@@ -157,6 +157,20 @@ calls. It needs Playwright with Chromium. Agents that drive their own browser
 can inject the inspector itself (`npx motion-ai inspector` prints it) and
 pause, list and seek animations directly.
 
+## Videos
+
+Your agent can write a video as one Motion `animate([...])` sequence and render
+it to MP4 on your machine. `video` steps Motion's manual clock one frame at a
+time, so springs and staggers land exactly on each frame:
+
+```bash
+npx motion-ai video sheet 0 6 0.5   # contact sheet to check the timing
+npx motion-ai video render          # motion-video/out/video.mp4
+```
+
+It needs `motion` 14.6 or later, `esbuild` and Playwright with Chromium in the
+project, and ffmpeg for the MP4.
+
 ## Free and Motion+
 
 | Feature                              | Free | Motion+ |
@@ -165,6 +179,7 @@ pause, list and seek animations directly.
 | Motion docs search                   |  ✓   |    ✓    |
 | CSS spring generation                |  ✓   |    ✓    |
 | Animation inspector and filmstrips   |  ✓   |    ✓    |
+| Video rendering                      |  ✓   |    ✓    |
 | Motion+ and early access docs        |      |    ✓    |
 | Examples and Motion UI source        |      |    ✓    |
 | Transition editor                    |      |    ✓    |
