@@ -136,8 +136,26 @@ Write `/motion` in your agent, then ask:
 - "Add a Motion UI pricing section"
 - "Audit src/Sheet.tsx for jank"
 - "Upgrade from framer-motion"
+- "Check the menu animation looks right"
 
 Your agent also uses the skill without `/motion` when you work on animations.
+
+## Animation inspector
+
+Agents can't watch an animation, so the kit lets them step through one.
+`filmstrip` pauses every Motion animation on a page, renders it frame by frame
+and writes a contact sheet for your agent to read, plus a JSON timeline of
+every animation that ran:
+
+```bash
+npx motion-ai filmstrip http://localhost:3000 --click "#open-menu"
+```
+
+It works with any page running Motion 14 or later, production builds
+included, and adds nothing to your app: it listens on a hook Motion already
+calls. It needs Playwright with Chromium. Agents that drive their own browser
+can inject the inspector itself (`npx motion-ai inspector` prints it) and
+pause, list and seek animations directly.
 
 ## Free and Motion+
 
@@ -146,6 +164,7 @@ Your agent also uses the skill without `/motion` when you work on animations.
 | Animation best practices             |  ✓   |    ✓    |
 | Motion docs search                   |  ✓   |    ✓    |
 | CSS spring generation                |  ✓   |    ✓    |
+| Animation inspector and filmstrips   |  ✓   |    ✓    |
 | Motion+ and early access docs        |      |    ✓    |
 | Examples and Motion UI source        |      |    ✓    |
 | Transition editor                    |      |    ✓    |

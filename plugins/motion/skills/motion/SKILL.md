@@ -1,7 +1,7 @@
 ---
 name: motion
 description: >
-    Animation skill for Motion (prev Framer Motion) and CSS animation. Provides: animation best practices (including specific advice for vanilla JS, React, Vue, Base UI and Radix), documentation and example search, CSS spring and bounce generation, MotionScore code and runtime performance audits with Performance Doctor fixes, and the visual transition editor. Use when writing animations, working with Motion (motion, motion/react, motion-v, framer-motion), animating a UI, writing CSS linear() springs, auditing or fixing slow animations, performance, jank or layout thrash via code or runtime, searching Motion docs or examples, adding a Motion UI section, or upgrading between Motion versions.
+    Animation skill for Motion (prev Framer Motion) and CSS animation. Provides: animation best practices (including specific advice for vanilla JS, React, Vue, Base UI and Radix), documentation and example search, CSS spring and bounce generation, MotionScore code and runtime performance audits with Performance Doctor fixes, the visual transition editor, and an animation inspector that pauses and steps through a page's animations frame by frame. Use when writing animations, working with Motion (motion, motion/react, motion-v, framer-motion), animating a UI, writing CSS linear() springs, auditing or fixing slow animations, performance, jank or layout thrash via code or runtime, checking what an animation looks like or debugging one that looks wrong, searching Motion docs or examples, adding a Motion UI section, or upgrading between Motion versions.
 argument-hint: "[subcommand or question, e.g. 'fix animation performance on the homepage', 'audit src/Modal.tsx', 'spring bounce 0.3', 'upgrade', 'how do I animate a list']"
 ---
 
@@ -13,6 +13,7 @@ Animation for the web, done properly.
 -   [Documentation, examples and Motion UI search](codex/index.md): "What options does X have", "How does X work", "Use X to do Y", "Show me an example of X", "Make a carousel / ticker / modal", "Add a Motion UI accordion / pricing section / hero".
 -   [CSS spring and bounce generation](css-spring/index.md): "Generate a CSS spring with a bounce of 0.5 over 0.3s", "Make this bouncier", "Give me a bounce easing".
 -   [Performance Doctor (MotionScore audit)](performance-audit/index.md): "Fix animation performance on the homepage", "Why is this animation slow", "Run Performance Doctor on src/", "Audit src/Modal.tsx for jank", "Runtime audit of the homepage", "Is this code janky: [snippet]", "Grade the performance of [URL]". You may also run audits proactively and report what you find. Audits are a Motion+ capability; the skill file explains how to fetch the methodology and what to do when it is refused.
+-   [Animation inspector](animation-inspector/index.md): "Check the menu animation looks right", "Why does this animation jump", "Show me what happens when I click Open", "Capture a filmstrip of the hero animation". After writing or changing an animation, you may check it this way proactively.
 -   [Transition preview](transition-preview/index.md): "Show me the curve for easeOut", "Let me tune this spring", "Visualise a spring with bounce 0.5".
 
 ## Upgrading Motion
