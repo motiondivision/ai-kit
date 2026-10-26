@@ -267,6 +267,29 @@ describe("motion inspector", () => {
         close(await page.evaluate(() => latest), before, 0.5, "restored")
     })
 
+    test("seeks a sequence written for Motion's manual clock", async () => {
+        const manual = await browser.newPage()
+        await manual.addInitScript({ path: inspector })
+        await manual.addInitScript("MotionInspector.pause()")
+        await manual.goto(`${server.url}/sequence-manual.html`)
+        await wait(100)
+
+        const x = () =>
+            manual.evaluate(
+                () => new DOMMatrix(getComputedStyle(a).transform).m41
+            )
+        const opacity = () =>
+            manual.evaluate(() => Number(getComputedStyle(b).opacity))
+
+        await manual.evaluate(() => MotionInspector.seek(0.25))
+        close(await x(), 100, 1, "first segment")
+        close(await opacity(), 0, 0.02, "second not started")
+        await manual.evaluate(() => MotionInspector.seek(0.75))
+        close(await x(), 200, 1, "first segment done")
+        close(await opacity(), 0.5, 0.02, "second segment")
+        await manual.close()
+    })
+
     test("calls a hook that was already installed", async () => {
         const other = await browser.newPage()
         await other.addInitScript(() => {

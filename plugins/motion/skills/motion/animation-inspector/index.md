@@ -7,7 +7,8 @@ and look at each.
 
 Use it to check an animation you've written or changed does what was asked,
 to debug one the user says "looks wrong", or to show the user what an
-animation does.
+animation does. For a sequence you wrote as one `animate([...])` call, a
+filmstrip is a cheap check of its timing before rendering it in full.
 
 It works with any page running `motion`, `framer-motion` or `motion/mini`
 14.0 or later, including production builds. Nothing is added to the app.
