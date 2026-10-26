@@ -106,6 +106,17 @@
         typeof Animation !== "undefined" &&
         animation?.animation instanceof Animation
 
+    // Independent transforms run in JS, or in the browser once accelerated
+    const engineOf = ({ animation }) =>
+        isNative(animation) || animation.isAccelerated?.() ? "waapi" : "js"
+
+    // Entries off the timeline (before mark(), or over the cap) still running
+    let background = []
+    const isLive = ({ animation }) =>
+        animation.state === "running" || animation.state === "paused"
+
+    const errors = []
+
     const record = (info) => {
         const { animation } = info
 
@@ -124,6 +135,19 @@
 
         const options = info.options || {}
         const element = elementOf(options)
+
+        /**
+         * A JS animation with nothing to update can't change the page. Motion
+         * makes these to sample the value of a WAAPI animation.
+         */
+        if (
+            !isNative(animation) &&
+            !element &&
+            !options.motionValue &&
+            !options.onUpdate
+        ) {
+            return
+        }
         const start = info.timestamp
         if (origin === null) origin = start
         const type = typeOf(options)
@@ -132,8 +156,8 @@
             id: nextId++,
             animation,
             kind: "value",
-            engine: isNative(animation) ? "waapi" : "js",
             element: element || animation?.animation?.effect?.target || null,
+            motionValue: options.motionValue,
             property: options.name,
             keyframes: options.keyframes,
             type,
@@ -145,11 +169,15 @@
                       : options.ease,
             delay: toSeconds(options.delay),
             repeat: options.repeat || 0,
+            repeatDelay: toSeconds(options.repeatDelay),
             start,
             key: keyOf(info, options, element),
         }
         entries.push(entry)
-        if (entries.length > MAX_ENTRIES) entries.shift()
+        if (entries.length > MAX_ENTRIES) {
+            const dropped = entries.shift()
+            if (isLive(dropped)) background.push(dropped)
+        }
 
         /**
          * Hold it once whatever started it has finished setting it up, as
@@ -161,18 +189,33 @@
     const previous = globalThis.__MOTION_INSPECT__
     globalThis.__MOTION_INSPECT__ = (info) => {
         if (previous) previous(info)
-        record(info)
+        /**
+         * Motion swallows a hook's errors, so keep them where list() callers
+         * can see them, rather than silently listing nothing.
+         */
+        try {
+            record(info)
+        } catch (error) {
+            if (errors.length < 20) errors.push(String(error))
+        }
     }
 
     /**
-     * Pause an animation and note how to put it back. Animations keep their
-     * own time, so playing them later carries on from where they were held.
+     * Pause an animation, and note its state and its value's, to put back
+     * in play().
      */
     function hold(entry) {
         if (held.has(entry)) return
         const { animation } = entry
         const state = animation.state
-        held.set(entry, { state, time: animation.time })
+        /**
+         * Only a settled value is read: reading one that a WAAPI animation
+         * is running makes Motion sample it.
+         */
+        held.set(entry, {
+            state,
+            value: isLive(entry) ? undefined : entry.motionValue?.get(),
+        })
         if (state === "running") animation.pause()
     }
 
@@ -183,8 +226,10 @@
      * frame driver is stopped, or its WAAPI animation is cancelled.
      */
     function deactivate(entry) {
+        if (entry.inactive) return
         const { animation } = entry
-        if (entry.engine === "waapi") {
+        if (isNative(animation)) {
+            entry.rawTime = animation.animation.currentTime
             animation.animation.cancel()
         } else {
             animation.driver?.stop()
@@ -192,18 +237,30 @@
         entry.inactive = true
     }
 
-    const localTime = (entry, t) => t - toSeconds(entry.start - origin)
+    /**
+     * When an entry ends on its own timeline, in seconds including its
+     * delay. Infinity if it repeats forever.
+     */
+    const endOf = (entry) =>
+        entry.repeat === Infinity
+            ? Infinity
+            : entry.delay +
+              durationOf(entry.animation) * (entry.repeat + 1) +
+              entry.repeatDelay * entry.repeat
 
     const timeline = () =>
         entries.map((entry) => {
-            const duration = durationOf(entry.animation)
             const start = toSeconds(entry.start - origin)
-            const repeat = entry.repeat === Infinity ? 0 : entry.repeat
+            const end = endOf(entry)
             return {
                 entry,
                 start,
-                end: start + entry.delay + duration * (repeat + 1),
-                duration,
+                // An animation that repeats forever counts one iteration
+                end:
+                    start +
+                    (end === Infinity
+                        ? entry.delay + durationOf(entry.animation)
+                        : end),
             }
         })
 
@@ -218,27 +275,80 @@
             : value
     }
 
+    /**
+     * Put back one value's animations: the latest carries on if it was
+     * running, or the value goes back to how its animations left it.
+     */
+    function restore(group) {
+        const live = group.reduce((a, b) => (b.start > a.start ? b : a))
+        const touched = group.some(
+            (entry) => entry.inactive || entry.seekedTo !== undefined,
+        )
+
+        for (const entry of group) {
+            // Superseded WAAPI animations were cancelled when replaced
+            if (entry !== live && entry.seekedTo !== undefined) {
+                if (isNative(entry.animation))
+                    entry.animation.animation.cancel()
+            }
+        }
+
+        const { animation } = live
+        const saved = held.get(live)
+        if (saved.state === "running" || saved.state === "paused") {
+            if (live.inactive) {
+                if (isNative(animation)) {
+                    animation.animation.currentTime = live.rawTime
+                } else if (saved.state === "paused") {
+                    animation.driver?.start()
+                }
+            }
+            if (saved.state !== "running") return
+            if (live.seekedTo !== undefined && live.seekedTo >= endOf(live)) {
+                // WAAPI would replay from the start, so finish it here
+                animation.complete()
+            } else {
+                animation.play()
+            }
+        } else if (touched && live.kind !== "layout") {
+            // Finished or stopped: back to the value it left
+            if (isNative(animation)) animation.animation.cancel()
+            if (saved.value !== undefined) {
+                live.motionValue.set(saved.value)
+            } else if (!isNative(animation) && saved.state === "finished") {
+                animation.time = endOf(live)
+            }
+        }
+    }
+
     const api = {
         version: 1,
+
+        /**
+         * Errors the inspector hit reading Motion's animations, which may
+         * mean this Motion version isn't supported.
+         */
+        errors,
 
         /**
          * Every animation on the timeline, as plain data. start and end are
          * seconds on the timeline, duration and delay in seconds.
          */
         list() {
-            return timeline().map(({ entry, start, end, duration }) => ({
+            return timeline().map(({ entry, start, end }) => ({
                 id: entry.id,
                 kind: entry.kind,
-                engine: entry.engine,
+                engine: engineOf(entry),
                 target: describe(entry.element),
                 property: entry.property ?? null,
                 layoutId: entry.layoutId ?? null,
                 keyframes: json(entry.keyframes),
                 type: entry.type ?? null,
                 ease: json(entry.ease),
-                duration,
+                duration: durationOf(entry.animation),
                 delay: entry.delay,
                 repeat: entry.repeat === Infinity ? "infinite" : entry.repeat,
+                repeatDelay: entry.repeatDelay,
                 start,
                 end,
                 state: entry.animation.state,
@@ -247,8 +357,8 @@
         },
 
         /**
-         * The timeline's length in seconds: when its last finite animation
-         * ends.
+         * The timeline's length in seconds: when its last animation ends,
+         * counting one iteration of any that repeat forever.
          */
         duration() {
             return timeline().reduce((max, { end }) => Math.max(max, end), 0)
@@ -260,7 +370,9 @@
          */
         pause() {
             paused = true
+            background = background.filter(isLive)
             for (const entry of entries) hold(entry)
+            for (const entry of background) hold(entry)
         },
 
         /**
@@ -290,7 +402,11 @@
                 const { animation } = entry
                 if (animation.state === "running") animation.pause()
                 entry.inactive = false
-                animation.time = Math.max(0, localTime(entry, t))
+                entry.seekedTo = Math.min(
+                    Math.max(0, t - toSeconds(entry.start - origin)),
+                    endOf(entry),
+                )
+                animation.time = entry.seekedTo
             }
 
             // Motion renders on its next frame, the browser paints on the one after
@@ -299,27 +415,21 @@
         },
 
         /**
-         * Hand every animation back: those that were running carry on from
-         * where they are now, those that had finished or stopped go back to
-         * how they left the page.
+         * Hand every animation back. Those that were running carry on from
+         * the last time seeked, and finish if that was their end. Values
+         * whose animations had finished go back to how they were left.
          */
         play() {
             paused = false
-            for (const [entry, saved] of held) {
-                const { animation } = entry
-                if (saved.state === "running" || saved.state === "paused") {
-                    if (entry.inactive) {
-                        animation.time = saved.time
-                    }
-                    if (saved.state === "running") animation.play()
-                } else if (entry.engine === "waapi") {
-                    // Finished and stopped WAAPI animations committed their
-                    // style and were cancelled
-                    animation.animation.cancel()
-                } else if (entry.inactive === false) {
-                    animation.time = saved.time
-                }
+            const groups = new Map()
+            for (const entry of held.keys()) {
+                const group = groups.get(entry.key)
+                group ? group.push(entry) : groups.set(entry.key, [entry])
+            }
+            for (const group of groups.values()) restore(group)
+            for (const entry of held.keys()) {
                 entry.inactive = false
+                entry.seekedTo = undefined
             }
             held.clear()
         },
@@ -330,6 +440,7 @@
          */
         mark() {
             api.play()
+            background = background.concat(entries).filter(isLive)
             entries = []
             origin = null
         },

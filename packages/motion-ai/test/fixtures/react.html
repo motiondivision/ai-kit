@@ -32,6 +32,7 @@
             function App() {
                 const [right, setRight] = useState(false)
                 const [shown, setShown] = useState(true)
+                const [shifted, setShifted] = useState(false)
                 return h(
                     "div",
                     null,
@@ -45,6 +46,17 @@
                         { id: "hide", onClick: () => setShown(!shown) },
                         "Hide"
                     ),
+                    h(
+                        "button",
+                        { id: "shift", onClick: () => setShifted(!shifted) },
+                        "Shift"
+                    ),
+                    h(motion.div, {
+                        id: "shifter",
+                        className: "box",
+                        animate: { x: shifted ? 100 : 0 },
+                        transition: linear,
+                    }),
                     h(
                         "div",
                         { className: right ? "row right" : "row" },

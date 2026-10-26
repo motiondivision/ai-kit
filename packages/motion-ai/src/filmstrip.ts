@@ -47,15 +47,29 @@ interface Box {
     height: number
 }
 
+const FLAGS = [
+    "click",
+    "hover",
+    "frames",
+    "duration",
+    "selector",
+    "out",
+    "width",
+    "height",
+]
+
 function parse(args: string[]): Options {
     const flags: Record<string, string> = {}
     let url: string | undefined
     for (let i = 0; i < args.length; i++) {
         const arg = args[i]
         if (arg.startsWith("--")) {
-            const value = args[++i]
-            if (value === undefined) throw new Error(`${arg} needs a value`)
-            flags[arg.slice(2)] = value
+            // --name value or --name=value
+            const [name, inline] = arg.slice(2).split(/=(.*)/s)
+            if (!FLAGS.includes(name)) throw new Error(`Unknown option --${name}`)
+            const value = inline ?? args[++i]
+            if (value === undefined) throw new Error(`--${name} needs a value`)
+            flags[name] = value
         } else {
             url ??= arg
         }
@@ -88,9 +102,11 @@ function parse(args: string[]): Options {
  */
 function loadPlaywright() {
     for (const from of [join(process.cwd(), "package.json"), import.meta.url]) {
-        try {
-            return createRequire(from)("playwright")
-        } catch {}
+        for (const name of ["playwright", "@playwright/test", "playwright-core"]) {
+            try {
+                return createRequire(from)(name)
+            } catch {}
+        }
     }
     return null
 }
@@ -98,8 +114,9 @@ function loadPlaywright() {
 const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms))
 
 /**
- * Wait until the number of listed animations stops changing, as one
- * animation finishing often starts the next.
+ * Wait until the number of listed animations stops changing, as an
+ * interaction can start its animations over several frames (keyframes that
+ * need measuring, layout animations, React rendering).
  */
 async function waitForAnimations(page: any, quiet = 300, timeout = 3000) {
     const end = Date.now() + timeout
@@ -167,7 +184,13 @@ export async function filmstrip(args: string[]): Promise<void> {
         return
     }
 
-    const options = parse(args)
+    let options: Options
+    try {
+        options = parse(args)
+    } catch (error) {
+        console.error(`${(error as Error).message}\n\n${FILMSTRIP_USAGE}`)
+        process.exit(1)
+    }
     const playwright = loadPlaywright()
     if (!playwright) {
         console.error(
@@ -203,9 +226,14 @@ export async function filmstrip(args: string[]): Promise<void> {
             Math.min(await page.evaluate("MotionInspector.duration()"), 10)
         const animations = await page.evaluate("MotionInspector.list()")
 
+        const errors: string[] = await page.evaluate("MotionInspector.errors")
+        if (errors.length) {
+            console.error(`The inspector couldn't read some animations:\n  ${errors.join("\n  ")}`)
+        }
+
         if (!animations.length) {
             console.error(
-                "No Motion animations started. The page needs motion, framer-motion or motion/mini 14.0 or later."
+                "No Motion animations started within 3s. The page needs motion, framer-motion or motion/mini 14.0 or later."
             )
             process.exit(1)
         }

@@ -63,8 +63,9 @@ Then call it with the tool's evaluate:
 | `MotionInspector.list()` | Every animation on the timeline, as JSON |
 | `MotionInspector.duration()` | The timeline's length, in seconds |
 | `await MotionInspector.seek(t)` | Shows the page `t` seconds into the timeline. Resolves once the page has painted it, so screenshot straight after |
-| `MotionInspector.play()` | Lets every animation carry on |
-| `MotionInspector.mark()` | Starts a new timeline from the next animation, and forgets the ones listed so far |
+| `MotionInspector.play()` | Hands the page back: running animations carry on from the last time seeked (and finish if that was their end), finished ones go back to their end state |
+| `MotionInspector.mark()` | Starts a new timeline from the next animation, and forgets the ones listed so far. `pause()` still pauses any of them that are running |
+| `MotionInspector.errors` | Errors the inspector hit reading Motion's animations. If `list()` is empty and this isn't, the page's Motion version may not be supported |
 
 The timeline starts at the first animation since the page loaded or
 `mark()` was called. Times are in seconds, like Motion's own options.
@@ -97,9 +98,10 @@ A filmstrip of an interaction:
     didn't run, the element animates with CSS instead, or the page uses a
     Motion version before 14.0.
 -   `engine` is `waapi` for animations the browser runs (opacity, transform
-    and similar, off the main thread), `js` for those Motion runs each frame.
-    It's a quick check for performance: see
-    [Performance Doctor](../performance-audit/index.md) for a full audit.
+    and similar, including independent transforms like `x` once Motion
+    hands them to the browser), `js` for those Motion runs each frame. It's
+    a quick check, not an audit: see
+    [Performance Doctor](../performance-audit/index.md) for that.
 
 ## Limits
 
@@ -114,3 +116,9 @@ A filmstrip of an interaction:
     aren't listed, paused or seeked.
 -   Seeking a layout animation after it has finished isn't supported, as the
     layout it animated from is gone. Pause before the interaction.
+-   Seeking calls the page's `onUpdate` callbacks with the seeked values,
+    and `play()` calls them again as it puts values back. `onComplete` only
+    runs when an animation actually finishes.
+-   It reads some of Motion's internals, so it's tested against Motion 14.
+    A future Motion version could change them; `MotionInspector.errors`
+    says when it couldn't read an animation.

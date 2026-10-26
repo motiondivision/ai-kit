@@ -22,7 +22,7 @@ describe("motion-ai filmstrip", () => {
 
     test("captures a page's entrance animations from their first frame", async () => {
         const out = mkdtempSync(join(tmpdir(), "filmstrip-"))
-        await run(`${server.url}/entrance.html`, "--frames", "3", "--out", out)
+        await run(`${server.url}/entrance.html`, "--frames=3", "--out", out)
 
         assert.deepEqual(readdirSync(out).sort(), [
             "filmstrip.png",
@@ -73,6 +73,13 @@ describe("motion-ai filmstrip", () => {
         const png = readFileSync(join(out, "frame-00.png"))
         assert.equal(png.readUInt32BE(16), 500)
         assert.equal(png.readUInt32BE(20), 100)
+    })
+
+    test("rejects flags it doesn't know", async () => {
+        await assert.rejects(
+            run(`${server.url}/entrance.html`, "--frame", "3"),
+            (error) => /Unknown option --frame/.test(error.stderr)
+        )
     })
 
     test("fails clearly on a page without Motion animations", async () => {
