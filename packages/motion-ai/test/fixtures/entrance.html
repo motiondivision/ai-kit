@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+            .box {
+                width: 100px;
+                height: 100px;
+                background: red;
+            }
+        </style>
+        <script src="/motion.js"></script>
+    </head>
+    <body>
+        <div id="box" class="box"></div>
+        <script>
+            Motion.animate(
+                "#box",
+                { opacity: [0, 1], x: [0, 300] },
+                { duration: 0.5, ease: "linear" }
+            )
+        </script>
+    </body>
+</html>

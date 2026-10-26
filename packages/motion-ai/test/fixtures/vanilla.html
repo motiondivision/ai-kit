@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+            .box {
+                width: 100px;
+                height: 100px;
+                background: red;
+            }
+        </style>
+        <script src="/motion.js"></script>
+    </head>
+    <body>
+        <div id="box" class="box"></div>
+        <div id="other" class="box card"></div>
+        <button id="go">Go</button>
+        <script>
+            const { animate, motionValue } = Motion
+            const linear = { duration: 1, ease: "linear" }
+
+            // Tests start animations on demand so the inspector's state is
+            // set up first
+            window.start = () => {
+                // WAAPI: opacity and transform run in the browser
+                animate("#box", { opacity: [0, 1], x: [0, 100] }, linear)
+                // JS: a motion value with no element
+                window.progress = motionValue(0)
+                animate(window.progress, 100, { duration: 2, ease: "linear" })
+            }
+
+            window.startDelayed = () => {
+                animate(
+                    "#other",
+                    { opacity: [0, 1] },
+                    { ...linear, delay: 0.5 }
+                )
+            }
+
+            // An interaction that runs a short sequence
+            document.getElementById("go").addEventListener("click", () => {
+                animate("#box", { opacity: [1, 0.2] }, linear)
+            })
+
+            window.opacityOf = (selector) =>
+                Number(getComputedStyle(document.querySelector(selector)).opacity)
+            window.translateXOf = (selector) =>
+                new DOMMatrix(
+                    getComputedStyle(document.querySelector(selector)).transform
+                ).m41
+        </script>
+    </body>
+</html>
