@@ -116,6 +116,8 @@ A filmstrip of an interaction:
     aren't listed, paused or seeked.
 -   Seeking a layout animation after it has finished isn't supported, as the
     layout it animated from is gone. Pause before the interaction.
+-   Seeking back into a layout animation that a second layout animation
+    interrupted shows the wrong frame. The end state is still right.
 -   Seeking calls the page's `onUpdate` callbacks with the seeked values,
     and `play()` calls them again as it puts values back. `onComplete` only
     runs when an animation actually finishes.
