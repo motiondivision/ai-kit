@@ -44,6 +44,12 @@ segments.
     prints page errors.
 -   Add `--video <file>` to render another file, and `--out <dir>` to write
     somewhere else.
+-   Import images, fonts and CSS files from `Video.tsx` (`import logo from
+    "./logo.svg"`). They are bundled in, and the renderer waits for them
+    before the first frame. The page has no network, so do not load assets
+    by URL.
+-   If the page throws, the command fails and `render` writes no MP4. Fix
+    the error and run it again.
 
 ## Work plan
 
@@ -199,8 +205,9 @@ export function Video() {
     whole line and offset it per word, so it does not restart on each word.
     Accents (underlines, glows) use the same palette as the hero colour, not a
     flat default.
--   Fonts: use system fonts (`Inter, system-ui, sans-serif`) unless the project
-    already ships a font file. The renderer has no network.
+-   Fonts: use system fonts (`Inter, system-ui, sans-serif`), or import the
+    project's own font files in a CSS file with `@font-face`. The renderer has
+    no network.
 
 ## QA list (check each sheet)
 

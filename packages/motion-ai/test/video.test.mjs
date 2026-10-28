@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { execFile, execFileSync } from "node:child_process"
-import { mkdtempSync, readFileSync } from "node:fs"
+import { existsSync, mkdtempSync, readFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, test } from "node:test"
@@ -64,6 +64,37 @@ describe("motion-ai video", () => {
             join(out, "video.mp4"),
         ]).toString().trim()
         assert.equal(frames, "120")
+    })
+
+    test("mounts the video at its own size", async () => {
+        const { stdout } = await run("stills", "0", "--video", fixture("Wide.tsx"))
+        assert.doesNotMatch(stdout, /Page errors/)
+    })
+
+    test("shows imported images and stylesheets from the first frame", { skip: !ffmpeg && "ffmpeg is not installed" }, async () => {
+        const { out } = await run("stills", "0", "--video", fixture("Assets.tsx"))
+        // The image is a 64px blue square in the top left corner
+        const pixel = execFileSync("ffmpeg", [
+            "-v", "error", "-i", join(out, "stills", "frame-00.png"),
+            "-vf", "crop=1:1:32:32", "-f", "rawvideo", "-pix_fmt", "rgb24", "-",
+        ])
+        assert.deepEqual([...pixel], [0, 128, 255])
+    })
+
+    test("fails without writing an MP4 when the page throws", { skip: !ffmpeg && "ffmpeg is not installed" }, async () => {
+        let out
+        await assert.rejects(
+            (async () => {
+                out = mkdtempSync(join(tmpdir(), "video-"))
+                await promisify(execFile)("node", [cli, "video", "render", "--video", fixture("Throws.tsx"), "--out", out])
+            })(),
+            (error) => {
+                assert.equal(error.code, 1)
+                assert.match(error.stderr, /Video broke/)
+                return true
+            }
+        )
+        assert.equal(existsSync(join(out, "video.mp4")), false)
     })
 
     test("says what is missing when the file doesn't export Video and duration", async () => {

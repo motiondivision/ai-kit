@@ -21,8 +21,38 @@ const container = document.getElementById("root")!
 container.style.width = width + "px"
 container.style.height = height + "px"
 
-const root = createRoot(container)
-flushSync(() => root.render(<Video />))
+const mount = () => {
+    const root = createRoot(container)
+    flushSync(() => root.render(<Video />))
+    return root
+}
 
-;(window as any).__frame = (ms: number) => processFrame(ms)
-;(window as any).__video = { duration, width, height, fps }
+/** Fonts and images the video uses, loaded and decoded. */
+const assets = () =>
+    Promise.all([
+        document.fonts.ready,
+        ...Array.from(document.images, (image) => image.decode().catch(() => {})),
+    ])
+
+// Mount once to request every font and image, then mount again once they
+// have loaded, so layout measured on mount sees the right fonts, and wait
+// for the images again so the first frame shows them. Time stays at 0
+// throughout.
+const boot = async () => {
+    await assets()
+    mount().unmount()
+    container.textContent = ""
+    await assets()
+    // Errors before this point came from the warm-up mount, as assets loaded
+    console.debug("motion-ai:mount")
+    mount()
+    // Fonts stay loaded across mounts, but each new image decodes again
+    await assets()
+    ;(window as any).__frame = (ms: number) => processFrame(ms)
+    ;(window as any).__video = { duration, width, height, fps }
+}
+
+// The renderer reads the size, resizes the window and reloads, so the video
+// never mounts at the wrong size
+if (innerWidth === width && innerHeight === height) boot()
+else (window as any).__video = { duration, width, height, fps, resize: true }

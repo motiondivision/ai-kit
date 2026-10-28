@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process"
-import { mkdirSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
@@ -11,6 +11,8 @@ import {
 } from "./capture.js"
 
 const VIDEO_DIR = fileURLToPath(new URL("../video/", import.meta.url))
+
+const ASSETS = [".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".svg", ".woff", ".woff2", ".ttf", ".otf"]
 
 export const VIDEO_USAGE = `Usage:  npx motion-ai video <command> [options]
 
@@ -110,6 +112,7 @@ async function bundle(video: string, out: string) {
         fail("motion-ai video needs esbuild in the project.\n\n  npm i -D esbuild")
     }
     mkdirSync(out, { recursive: true })
+    rmSync(join(out, "bundle.css"), { force: true })
     try {
         await (esbuild.build ?? esbuild.default.build)({
             entryPoints: [join(VIDEO_DIR, "entry.tsx")],
@@ -125,14 +128,18 @@ async function bundle(video: string, out: string) {
             },
             nodePaths: [join(process.cwd(), "node_modules")],
             plugins: [projectPackages],
+            // Images and fonts are inlined, as the page has no server
+            loader: Object.fromEntries(ASSETS.map((extension) => [extension, "dataurl"])),
         })
     } catch {
         process.exit(1)
     }
+    // Imported stylesheets are bundled next to the script
+    const css = existsSync(join(out, "bundle.css")) ? `<link rel="stylesheet" href="bundle.css">` : ""
     const html = join(out, "index.html")
     writeFileSync(
         html,
-        `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;overflow:hidden;background:#000}#root{position:relative;overflow:hidden}</style></head><body><div id="root"></div><script src="bundle.js"></script></body></html>`
+        `<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;overflow:hidden;background:#000}#root{position:relative;overflow:hidden}</style>${css}</head><body><div id="root"></div><script src="bundle.js"></script></body></html>`
     )
     return pathToFileURL(html).href
 }
@@ -163,19 +170,30 @@ export async function video(args: string[]): Promise<void> {
 
     const url = await bundle(options.video, options.out)
     const browser = await playwright.chromium.launch({ args: ["--font-render-hinting=none"] })
-    const errors: string[] = []
+    const pageErrors: string[] = []
+    const consoleErrors: string[] = []
     try {
         const page = await browser.newPage({ deviceScaleFactor: 1 })
-        page.on("pageerror", (e: Error) => errors.push(e.message))
-        page.on("console", (m: any) => m.type() === "error" && errors.push(m.text()))
+        page.on("pageerror", (e: Error) => pageErrors.push(e.message))
+        page.on("console", (m: any) => {
+            if (m.text() === "motion-ai:mount") pageErrors.length = consoleErrors.length = 0
+            else if (m.type() === "error") consoleErrors.push(m.text())
+        })
 
         let config: Config
         let current = 0
-        const open = async () => {
+        const open = async (): Promise<void> => {
             await page.goto(url)
-            config = await page.evaluate("window.__video")
-            if (!config) fail(`The video did not start:\n  ${[...new Set(errors)].join("\n  ")}`)
-            await page.setViewportSize({ width: config.width, height: config.height })
+            const started = await page
+                .waitForFunction("window.__video", null, { timeout: 15000 })
+                .then((handle: any) => handle.jsonValue())
+                .catch(() => null)
+            if (!started) fail(`The video did not start:\n  ${[...new Set(pageErrors)].join("\n  ")}`)
+            config = started
+            if (started.resize) {
+                await page.setViewportSize({ width: config.width, height: config.height })
+                return open()
+            }
             current = 0
         }
 
@@ -212,7 +230,25 @@ export async function video(args: string[]): Promise<void> {
             const times = Array.from({ length: total }, (_, f) => f / config.fps)
             const dir = join(options.out, "frames")
             rmSync(dir, { recursive: true, force: true })
+            rmSync(join(options.out, "video.mp4"), { force: true })
             await captureFrames(page, times, dir, { seek })
+            // A video whose page threw is not the video that was written
+            if (pageErrors.length) rmSync(dir, { recursive: true, force: true })
+            else await encode()
+        }
+
+        if (consoleErrors.length) {
+            console.log(`Console errors:\n  ${[...new Set(consoleErrors)].join("\n  ")}`)
+        }
+        if (pageErrors.length) {
+            fail(
+                `The page threw while rendering${options.command === "render" ? ", so no MP4 was written" : ""}:\n  ${[...new Set(pageErrors)].join("\n  ")}`
+            )
+        }
+
+        async function encode() {
+            const total = Math.round(config.duration * config.fps)
+            const dir = join(options.out, "frames")
             const file = join(options.out, "video.mp4")
             execFileSync("ffmpeg", [
                 "-y", "-loglevel", "error",
@@ -224,8 +260,6 @@ export async function video(args: string[]): Promise<void> {
             rmSync(dir, { recursive: true, force: true })
             console.log(`${file} (${total} frames, ${config.width}x${config.height} at ${config.fps} fps)`)
         }
-
-        if (errors.length) console.log(`Page errors:\n  ${[...new Set(errors)].join("\n  ")}`)
     } finally {
         await browser.close()
     }
