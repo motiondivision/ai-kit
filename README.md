@@ -14,6 +14,8 @@ Motion AI Kit is a suite of animation tools to help agents write production-grad
 
 **CSS spring generation:** Use Motion to generate spring animations for CSS via the `linear()` easing.
 
+**Video rendering:** Your agent writes a video as one Motion sequence and renders it to MP4 on your machine with `npx motion-ai video`, frame by frame, so springs and staggers land exactly on each frame.
+
 **MotionScore performance audits (Motion+):** Run static code and runtime analysis on a specific animation, component or page, graded by S to F, and fix with customised recommendations. The audit methodology is served live to your agent from the Motion+ MCP server, so every audit follows the current MotionScore scoring engine.
 
 ```
