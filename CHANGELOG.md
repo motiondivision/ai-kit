@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- The Motion plugin is now available for VS Code, Copilot CLI and the Copilot app, from the `motiondivision/ai-kit` marketplace.
+
 ## [7.0.1] 2026-10-15
 
 ### Changed

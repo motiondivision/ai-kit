@@ -12,7 +12,7 @@
     {
       "name": "motion",
       "source": "./plugins/motion",
-      "description": "Make Cursor good at animation: Motion and CSS best practices, documentation and example search, CSS spring generation, and the MotionScore performance audit."
+      "description": "Make Cursor good at animation: Motion and CSS best practices, documentation and example search, CSS spring generation, and Performance Doctor audits."
     }
   ]
 }

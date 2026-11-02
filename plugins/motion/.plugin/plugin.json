@@ -1,0 +1,29 @@
+{
+  "name": "motion",
+  "displayName": "Motion",
+  "version": "1.1.0",
+  "description": "Animation for the web, done properly. Motion and CSS best practices, official documentation and example search, CSS spring generation, and Performance Doctor audits that grade every animation by its render-pipeline cost.",
+  "author": {
+    "name": "Motion",
+    "email": "matt@motion.dev",
+    "url": "https://motion.dev"
+  },
+  "homepage": "https://motion.dev/docs/ai-kit",
+  "repository": "https://github.com/motiondivision/ai-kit",
+  "license": "MIT",
+  "keywords": [
+    "motion",
+    "animation",
+    "framer-motion",
+    "css",
+    "transitions",
+    "springs",
+    "performance",
+    "react",
+    "vue",
+    "javascript"
+  ],
+  "skills": "skills/",
+  "agents": "agents/",
+  "mcpServers": "mcp.json"
+}
