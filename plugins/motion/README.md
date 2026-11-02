@@ -14,7 +14,7 @@ Motion AI Kit is a suite of animation tools to help agents write production-grad
 
 **CSS spring generation:** Use Motion to generate spring animations for CSS via the `linear()` easing.
 
-**MotionScore performance audits (Motion+):** Run static code and runtime analysis on a specific animation, component or page, graded by S to F, and fix with customised recommendations. The audit methodology is served live to your agent from the Motion+ MCP server, so every audit follows the current MotionScore scoring engine.
+**Performance Doctor (Motion+):** Run static code and runtime analysis on a specific animation, component or page, graded by S to F, and fix with customised recommendations. The audit methodology is served live to your agent from the Motion+ MCP server, so every audit follows the current MotionScore scoring engine.
 
 ```
 > /motion src/components for animation performance
@@ -36,9 +36,31 @@ Upgrade:  Motion's `layout` prop (B) or a `scaleY` transform (S)
 
 In Cursor, open **Customize** from the sidebar, search the marketplace for **Motion**, and install. That's it. Write `/motion` and ask to search docs and generate springs; sign in with Motion+ to run audits and fetch source code.
 
+### VS Code and Copilot CLI
+
+[Install in VS Code](https://vscode.dev/redirect?url=vscode%3A%2F%2Fchat-plugin%2Finstall%3Fsource%3Dmotiondivision%2Fai-kit%26plugin%3Dmotion), or add the marketplace from the Copilot CLI:
+
+```
+copilot plugin marketplace add motiondivision/ai-kit
+copilot plugin install motion@motion
+```
+
+This installs the same skill and MCP servers as the Cursor plugin. In VS Code, plugins run in the Copilot harness.
+
+To recommend the plugin to everyone who works in your repository, add it to `.github/copilot/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "motion": { "source": { "source": "github", "repo": "motiondivision/ai-kit" } }
+  },
+  "enabledPlugins": { "motion@motion": true }
+}
+```
+
 ## Motion+
 
-**[Motion+](https://motion.dev/plus)** adds MotionScore performance audits, the ability to search early access and Motion+ API documentation, plus source code for 450+ Motion Examples and Motion UI components. Plus, an experimental visual editor for tuning transitions against a live preview and then applying via your agent.
+**[Motion+](https://motion.dev/plus)** adds Performance Doctor audits, the ability to search early access and Motion+ API documentation, plus source code for 450+ Motion Examples and Motion UI components. Plus, an experimental visual editor for tuning transitions against a live preview and then applying via your agent.
 
 Ask Cursor to sign you in and it hands you a link. Nothing gets pasted into
 chat.
@@ -49,6 +71,6 @@ chat.
 - [Documentation](https://motion.dev/docs)
 - [Examples](https://examples.motion.dev)
 - [Motion UI](https://motion.dev/ui)
-- [MotionScore](https://motion.dev/docs/motionscore)
+- [Performance Doctor](https://motion.dev/docs/performance-doctor)
 
 ---

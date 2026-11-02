@@ -1,8 +1,8 @@
 {
   "name": "motion",
   "displayName": "Motion",
-  "version": "1.0.0",
-  "description": "Animation for the web, done properly. Motion and CSS best practices, official documentation and example search, CSS spring generation, and the MotionScore performance audit that grades every animation by its render-pipeline cost.",
+  "version": "1.1.0",
+  "description": "Animation for the web, done properly. Motion and CSS best practices, official documentation and example search, CSS spring generation, and Performance Doctor audits that grade every animation by its render-pipeline cost.",
   "author": {
     "name": "Motion",
     "email": "matt@motion.dev",

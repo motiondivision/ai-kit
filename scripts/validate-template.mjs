@@ -247,6 +247,79 @@ function resolveMarketplaceSource(source, pluginRoot) {
   return `${normalizedRoot}/${normalizedSource}`;
 }
 
+/**
+ * The Copilot marketplace (VS Code, Copilot CLI and the Copilot app) lists the
+ * same plugin directories as the Cursor marketplace. Each plugin carries a
+ * legacy Copilot manifest at .plugin/plugin.json, which must agree with the
+ * Cursor manifest so both marketplaces ship the same plugin version.
+ */
+async function validateCopilotMarketplace() {
+  const marketplacePath = path.join(repoRoot, ".github", "plugin", "marketplace.json");
+  const marketplace = await readJsonFile(marketplacePath, "Copilot marketplace manifest");
+  if (!marketplace) return;
+
+  if (typeof marketplace.name !== "string" || !marketplaceNamePattern.test(marketplace.name)) {
+    addError('Copilot marketplace "name" must be lowercase kebab-case.');
+  }
+  if (!marketplace.owner || typeof marketplace.owner.name !== "string" || marketplace.owner.name.length === 0) {
+    addError('Copilot marketplace "owner.name" is required.');
+  }
+  if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length === 0) {
+    addError('Copilot marketplace "plugins" must be a non-empty array.');
+    return;
+  }
+
+  for (const [index, entry] of marketplace.plugins.entries()) {
+    const label = `Copilot plugins[${index}]`;
+    if (!entry || typeof entry.name !== "string" || typeof entry.source !== "string") {
+      addError(`${label} needs a string "name" and "source".`);
+      continue;
+    }
+    if (!isSafeRelativePath(entry.source)) {
+      addError(`${label}.source is not a safe relative path: "${entry.source}"`);
+      continue;
+    }
+
+    const pluginDir = path.join(repoRoot, entry.source);
+    if (!(await ensureDirectory(pluginDir, `${label}.source`))) continue;
+
+    if (await pathExists(path.join(pluginDir, "plugin.json"))) {
+      addError(
+        `${entry.name}: a root plugin.json switches Copilot to the Agent Plugins 1.0 format, which did not load mcp.json in testing. Keep the manifest at .plugin/plugin.json.`
+      );
+    }
+
+    const manifest = await readJsonFile(
+      path.join(pluginDir, ".plugin", "plugin.json"),
+      `${entry.name} Copilot plugin manifest`
+    );
+    if (!manifest) continue;
+
+    if (manifest.name !== entry.name) {
+      addError(`${entry.name}: Copilot marketplace entry name does not match .plugin/plugin.json name ("${manifest.name}").`);
+    }
+    if (entry.version !== undefined && entry.version !== manifest.version) {
+      addError(`${entry.name}: Copilot marketplace version "${entry.version}" does not match .plugin/plugin.json "${manifest.version}".`);
+    }
+
+    for (const field of ["skills", "agents", "mcpServers"]) {
+      for (const value of extractPathValues(manifest[field])) {
+        await validateReferencedPath(pluginDir, field, value, entry.name);
+      }
+    }
+
+    const cursorManifestPath = path.join(pluginDir, ".cursor-plugin", "plugin.json");
+    if (await pathExists(cursorManifestPath)) {
+      const cursorManifest = await readJsonFile(cursorManifestPath, `${entry.name} plugin manifest`);
+      if (cursorManifest && cursorManifest.version !== manifest.version) {
+        addError(
+          `${entry.name}: Copilot manifest version "${manifest.version}" does not match the Cursor manifest "${cursorManifest.version}".`
+        );
+      }
+    }
+  }
+}
+
 async function main() {
   const marketplacePath = path.join(repoRoot, ".cursor-plugin", "marketplace.json");
   const marketplace = await readJsonFile(marketplacePath, "Marketplace manifest");
@@ -354,6 +427,8 @@ async function main() {
       addWarning(`${entry.name}: no mcp.json file found (only needed when using MCP servers).`);
     }
   }
+
+  await validateCopilotMarketplace();
 
   summarizeAndExit();
 }

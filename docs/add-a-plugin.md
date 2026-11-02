@@ -57,6 +57,29 @@ Edit `.cursor-plugin/marketplace.json` and append a new entry:
 
 `source` is the relative path from the repository root to the plugin folder.
 
+### Copilot marketplace (VS Code, Copilot CLI, Copilot app)
+
+Add the same entry to `.github/plugin/marketplace.json`, with a `version`, and add a Copilot manifest at `plugins/my-new-plugin/.plugin/plugin.json`:
+
+```json
+{
+  "name": "my-new-plugin",
+  "version": "0.1.0",
+  "description": "Describe what this plugin does",
+  "skills": "skills/",
+  "agents": "agents/",
+  "mcpServers": "mcp.json"
+}
+```
+
+Keep this manifest at `.plugin/plugin.json`, not the plugin root. A root `plugin.json` switches Copilot to the Agent Plugins 1.0 format, which did not load our `mcp.json` in testing (Copilot CLI 1.0.105). Keep `version` the same as the Cursor manifest. To check it locally:
+
+```bash
+copilot plugin marketplace add "$PWD"
+copilot plugin install my-new-plugin@motion
+copilot mcp list
+```
+
 ## 4. Validate
 
 ```bash

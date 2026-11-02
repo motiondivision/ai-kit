@@ -1,0 +1,23 @@
+{
+  "name": "motion",
+  "owner": {
+    "name": "Motion",
+    "email": "matt@motion.dev"
+  },
+  "metadata": {
+    "description": "Official plugins from Motion, the animation library for the web.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "motion",
+      "source": "./plugins/motion",
+      "description": "Make your agent good at animation: Motion and CSS best practices, documentation and example search, CSS spring generation, and Performance Doctor audits.",
+      "version": "1.1.0",
+      "homepage": "https://motion.dev/docs/ai-kit",
+      "repository": "https://github.com/motiondivision/ai-kit",
+      "license": "MIT",
+      "category": "frontend"
+    }
+  ]
+}
