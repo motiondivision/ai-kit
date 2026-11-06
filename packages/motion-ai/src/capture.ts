@@ -5,8 +5,8 @@ import { join } from "node:path"
 /**
  * Frame capture shared by the commands that render a page frame by frame.
  * They differ only in how they move the page to a time: the filmstrip seeks
- * Motion's animations with the inspector, a page on Motion's manual clock
- * would call processFrame().
+ * Motion's animations with the inspector, the video command steps Motion's
+ * manual clock with processFrame().
  */
 
 export interface Box {
@@ -37,6 +37,12 @@ export function loadPlaywright() {
 }
 
 /**
+ * Digits in frame file names: at least two, more for long captures, so the
+ * files sort in order and ffmpeg can read them as a sequence.
+ */
+export const frameDigits = (count: number) => Math.max(2, String(count - 1).length)
+
+/**
  * Move the page to each time, in seconds, and screenshot it.
  */
 export async function captureFrames(
@@ -47,9 +53,10 @@ export async function captureFrames(
 ): Promise<Frame[]> {
     mkdirSync(out, { recursive: true })
     const frames: Frame[] = []
+    const digits = frameDigits(times.length)
     for (const [i, time] of times.entries()) {
         await seek(time)
-        const file = join(out, `frame-${String(i).padStart(2, "0")}.png`)
+        const file = join(out, `frame-${String(i).padStart(digits, "0")}.png`)
         await page.screenshot({ path: file, ...(clip && { clip }) })
         frames.push({ file, time })
     }
