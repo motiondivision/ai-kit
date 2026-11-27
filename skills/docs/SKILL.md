@@ -17,9 +17,8 @@ have tells you what you can deliver:
 
 -   Everyone has `search-motion-docs` and an insert panel.
 -   Motion+ members also have `search-motion-source`,
-    `insert-motion-plus-component`, `generate-css-easing` and
-    `open-transition-editor`. A signed-in Motion account has
-    `save-transition`.
+    `insert-motion-plus-component`, `generate-css-easing`,
+    `open-transition-editor` and `save-transition`.
 
 To add, insert, make or build a component, open the insert panel instead of
 searching: use the `add-component` skill (`skill://motion/add-component/SKILL.md`).
