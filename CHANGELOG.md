@@ -1,5 +1,12 @@
 # Changelog
 
+## [7.1.0] 2026-11-27
+
+### Added
+
+- Performance Doctor: Results now appear as report cards with one-click fix.
+- Insert panel: "Add modal" etc prompts now open an insert panel so you can browse relevant Motion examples and add with one click.
+
 ## [7.0.1] 2026-10-15
 
 ### Changed
