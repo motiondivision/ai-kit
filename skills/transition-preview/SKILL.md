@@ -1,3 +1,8 @@
+---
+name: transition-preview
+description: "Show or tune how a transition feels: preview an easing curve or a spring and adjust it with sliders. Use when the user wants to see, visualise, compare or tweak an easing, spring or transition timing."
+---
+
 # Transition preview
 
 Numbers are a poor way to describe how something feels. When the user is
@@ -30,7 +35,7 @@ text route below when you know the host cannot show it.
 
 `generate-css-easing` returns the same curves as text, and a CSS `linear()` or
 `cubic-bezier()` in the file is something the user can look at in their own
-browser immediately. See [css-spring/index.md](../css-spring/index.md).
+browser immediately. See the `css-spring` skill (`skill://motion/css-spring/SKILL.md`).
 
 For named easings, the cubic-bezier control points are:
 

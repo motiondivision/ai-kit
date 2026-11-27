@@ -99,4 +99,4 @@ When integrating with Radix:
 
 ## API guidance
 
-The latest docs are available via the Motion MCP. Check the [Codex](../codex/index.md) documentation.
+The latest docs are available via the Motion MCP. Search it with the `docs` skill (`skill://motion/docs/SKILL.md`).

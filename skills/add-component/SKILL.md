@@ -1,3 +1,8 @@
+---
+name: add-component
+description: "Add a ready-made animated component or section from Motion's library: carousel, accordion, tabs, marquee, ticker, pricing, hero, testimonials, navigation and more. Use when the user asks to add, insert, make or build one of these. For modals and dialogs use the modal skill instead."
+---
+
 # Insert panel: adding a Motion component
 
 When the user asks to add, insert, make or build something animated, open
@@ -9,15 +14,12 @@ is.
 
 ## Which tool
 
-The same panel is on both MCP servers. **Prefer the Motion+ one when you have
-it.**
+Use the insert tool you have. **Prefer the Motion+ one when it is there.**
 
--   `insert-motion-plus-component` (Motion+ server): every item is open, and
-    each pick reads paste-ready source. You have it only when the editor is
-    signed in to the Motion+ server with a Motion+ account.
--   `insert-motion-component` (Motion server): open to everyone. Free examples
-    are open. Motion+ items show as locked, with a link to
-    https://motion.dev/plus.
+-   `insert-motion-plus-component` (Motion+ members): every item is open, and
+    each pick reads paste-ready source.
+-   `insert-motion-component` (everyone else): free examples are open.
+    Motion+ items show as locked, with a link to https://motion.dev/plus.
 
 ```
 insert-motion-plus-component({ platform, query })
@@ -43,7 +45,7 @@ Search the thing, not the word "animation": `carousel`, `drag`, `hero`.
     later, VS Code), say one line, such as "Pick one from the panel," and stop.
     Do not choose for the user or start building before the pick arrives.
 -   **When the pick arrives**, read the resource it names and build from it,
-    following "Implement" in [codex/index.md](../codex/index.md). For Motion UI,
+    following "Implement" in the `docs` skill (`skill://motion/docs/SKILL.md`). For Motion UI,
     paste and adapt every file.
 -   **In a host without MCP Apps** (most terminals), nothing renders. The text
     of the result lists the matches as resource_links, like a search. With a
@@ -51,7 +53,7 @@ Search the thing, not the word "animation": `carousel`, `drag`, `hero`.
     from the best match when the request was specific. Without a query, ask
     what to build, then call the tool again with it.
 -   **A locked pick** (Motion server, no Motion+): follow "When source is
-    unavailable" in [codex/index.md](../codex/index.md). Do not reconstruct it
+    unavailable" in the `docs` skill (`skill://motion/docs/SKILL.md`). Do not reconstruct it
     from its description.
 
 ## When not to use it
@@ -59,6 +61,6 @@ Search the thing, not the word "animation": `carousel`, `drag`, `hero`.
 -   Questions about an API or an option ("what does `layout` do"): use
     `search-motion-docs`.
 -   Animating something that already exists in the project ("fade this modal
-    in"): use [best-practices](../best-practices/index.md).
+    in"): use the `animate` skill (`skill://motion/animate/SKILL.md`).
 -   The user named an exact Motion+ example or section and wants its source:
     `search-motion-source` gets it without a pick.

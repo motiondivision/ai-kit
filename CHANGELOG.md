@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Motion's skills are now served by the MCP server: animate, modal, performance audit, add component, docs, CSS springs, transition preview and upgrade. They update without re-running `npx motion-ai`, and agents can pick them without `/motion`.
+
+### Changed
+
+- `npx motion-ai --plus` now installs one server, the Motion+ server under the name `motion`, and removes the old `motion-plus` server.
+
 ## [7.1.0] 2026-11-27
 
 ### Added

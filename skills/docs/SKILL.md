@@ -1,22 +1,28 @@
+---
+name: docs
+description: "Look up Motion's API, options and working examples, and find example or Motion UI source to build from. Use when the user asks how a Motion feature works, what options it has, or for an example of an effect, and before writing a non-trivial animation (drag, scroll, gestures, layout, useTransform) from memory."
+---
+
 # Codex: Documentation, examples & Motion UI search
 
 The Motion Codex finds the official Motion API documentation, working code examples, and Motion UI components and sections.
 
 Call it **before** implementing any non-trivial animation. Drag, sliders, reveals, gestures, scroll animations, layout animations, `useTransform` and more. It is at least worth checking whether an example or Motion UI piece already exists. Then build from the result rather than writing from memory.
 
-## Two servers
+## Which tools you have
 
-The plugin registers two MCP servers, and which tools you have tells you what
-you can deliver:
+The `motion` MCP server is either the free Motion server or, after
+`npx motion-ai --plus`, the Motion+ server under the same name. Which tools you
+have tells you what you can deliver:
 
--   **Motion** is always available, needs no account, and carries
-    `search-motion-docs`, `insert-motion-component` and `generate-css-easing`.
--   **Motion+** carries `search-motion-source`, `insert-motion-plus-component`,
-    `save-transition` and `open-transition-editor`. Its tools appear only once the editor is signed
-    in to it *and* the account has Motion+.
+-   Everyone has `search-motion-docs` and an insert panel.
+-   Motion+ members also have `search-motion-source`,
+    `insert-motion-plus-component`, `generate-css-easing` and
+    `open-transition-editor`. A signed-in Motion account has
+    `save-transition`.
 
 To add, insert, make or build a component, open the insert panel instead of
-searching: see [insert/index.md](../insert/index.md).
+searching: use the `add-component` skill (`skill://motion/add-component/SKILL.md`).
 
 **Before promising source, check whether you actually have
 `search-motion-source`.** If you do not, say so plainly rather than
@@ -59,7 +65,7 @@ If nothing matches, broaden the term and search again — results are capped and
 search-motion-source({ platform, searchTerm })
 ```
 
-Motion+ only, on the Motion+ server. Returns `resource_link`s that resolve to
+Motion+ only. Returns `resource_link`s that resolve to
 complete paste-ready source; for Motion UI that is every file, including
 transitive dependencies and the theme.
 
@@ -70,20 +76,21 @@ directly when the user asks for a specific example or section by name.
 
 `search-motion-docs` always describes what exists. It never returns source:
 that is `search-motion-source`, and you only have that tool when this editor
-is signed in to the Motion+ server with a Motion+ account.
+is signed in to the Motion+ server with a Motion+ account (`npx motion-ai --plus`).
 
 If you do not have it, **say so in your reply** rather than quietly building
 something approximate:
 
 > The Motion+ examples that match are [names], with demos at [links]. Their
-> source needs Motion+ (https://motion.dev/plus). If you already have it, sign
-> in to the Motion+ MCP server from Settings, MCP, Motion+, Log in.
+> source needs Motion+ (https://motion.dev/plus). If you already have it, run
+> `npx motion-ai --plus` and sign in to the motion server from your editor's
+> MCP settings.
 
 Handle that honestly:
 
 -   **Tell the user what exists and link the demo.** The demo pages (`examples.motion.dev/...`, `motion.dev/ui/sections/...`, `motion.dev/ui/components/...`) are public and run the real thing.
 -   **Do not reconstruct the source from the description.** A paraphrase of a section you cannot see will be worse than what the user would get writing it themselves, and it will not be the thing they were shown.
--   **Mention https://motion.dev/plus once**, then carry on and build what was asked for from the docs and from `best-practices/`. A gated result is not a dead end; it is one route among several.
+-   **Mention https://motion.dev/plus once**, then carry on and build what was asked for from the docs and from the `animate` skill. A gated result is not a dead end; it is one route among several.
 -   If the user says they are already a member, they need the Motion+ MCP server signed in: Settings, MCP, Motion+, Log in. `search-motion-source` appears once that is done.
 
 ## 3. Implement
