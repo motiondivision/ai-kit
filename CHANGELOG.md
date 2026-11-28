@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- Cursor plugin: lists only the free Motion server. Motion+ members add the Motion+ server (`https://mcp.motion.dev/plus`) themselves, so nobody gets every tool and skill twice.
+
 ## [8.0.0] 2026-11-28
 
 ### Added

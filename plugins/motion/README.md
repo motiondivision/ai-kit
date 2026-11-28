@@ -34,14 +34,16 @@ Upgrade:  Motion's `layout` prop (B) or a `scaleY` transform (S)
 
 ## Install
 
-In Cursor, open **Customize** from the sidebar, search the marketplace for **Motion**, and install. That's it. Write `/motion` and ask to search docs and generate springs; sign in with Motion+ to run audits and fetch source code.
+In Cursor, open **Customize** from the sidebar, search the marketplace for **Motion**, and install. That's it. Write `/motion` and ask to search docs and generate springs.
 
 ## Motion+
 
 **[Motion+](https://motion.dev/plus)** adds MotionScore performance audits, the ability to search early access and Motion+ API documentation, plus source code for 450+ Motion Examples and Motion UI components. Plus, an experimental visual editor for tuning transitions against a live preview and then applying via your agent.
 
-Ask Cursor to sign you in and it hands you a link. Nothing gets pasted into
-chat.
+Members add the Motion+ MCP server in Cursor's MCP settings, with the URL
+`https://mcp.motion.dev/plus`, and sign in from there. Nothing gets pasted
+into chat. The Motion+ server includes every tool of the free server, so turn
+off the plugin's Motion server to avoid duplicate tools.
 
 ## Links
 
