@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [8.0.0] 2026-11-28
 
 ### Added
 
@@ -8,7 +8,7 @@
 
 ### Changed
 
-- `npx motion-ai --plus` now installs one server, the Motion+ server under the name `motion`, and removes the old `motion-plus` server.
+- `npx motion-ai --plus` now installs one server, the Motion+ server under the name `motion`, and removes the old `motion` and `motion-plus` server.
 
 ## [7.1.0] 2026-11-27
 
