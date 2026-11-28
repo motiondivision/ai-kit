@@ -1,0 +1,9 @@
+{
+  "//": "Skills the Motion MCP server serves whose source is not in this repo (Motion+ recipes). The installer writes a local stub for each, as it does for skills/. Keep each description the same as the server's SKILL.md in motion-api.",
+  "skills": [
+    {
+      "name": "modal",
+      "description": "Build or change a modal, dialog, confirmation, alert or lightbox so it behaves right: native dialog, focus, scroll lock, dismiss, and an enter and exit animation in the app's own style. Use whenever a request makes something into a modal or dialog (\"make X a modal\", \"add a confirmation\", \"show this in a dialog\"), even when it doesn't mention animation. Motion+ recipe."
+    }
+  ]
+}

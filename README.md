@@ -42,9 +42,11 @@ In Cursor, open **Customize** from the sidebar, search the marketplace for **Mot
 npx motion-ai
 ```
 
-Installs the Motion skills and configures the free hosted MCP server for Claude Code, Codex, Amp, OpenCode, Gemini CLI, Copilot or any custom agent folder. For Codex, skills install to `.agents/skills/` and MCP configuration to `.codex/config.toml`. No API key needed.
+Installs the `/motion` skill and configures the free hosted MCP server for Claude Code, Codex, Amp, OpenCode, Gemini CLI, Copilot or any custom agent folder. For Codex, skills install to `.agents/skills/` and MCP configuration to `.codex/config.toml`. No API key needed.
 
-Motion+ members also add the Motion+ MCP server, then sign in to it from their agent:
+Motion's skills are served by the MCP server, so they stay current without re-running the installer. The source of the free skills is in [`skills/`](skills).
+
+Motion+ members use the Motion+ MCP server instead. It has everything the free server has, plus the Motion+ tools and skills. Sign in to it from your agent:
 
 ```
 npx motion-ai --plus

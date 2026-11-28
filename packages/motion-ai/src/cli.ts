@@ -19,6 +19,7 @@ import {
     configureMcp,
     manualSnippet,
     mcpServers,
+    stubFoldersFor,
     writeAgentExtras,
     writeSkills,
     type Scope,
@@ -36,7 +37,7 @@ async function main(): Promise<void> {
     if (args.includes("--version") || args.includes("-v")) return console.log(VERSION)
     if (args.includes("--help") || args.includes("-h")) {
         console.log(
-            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP server) into your AI agents.\n\nUsage:  npx motion-ai           skills + the free Motion MCP server\n        npx motion-ai --plus    also add the Motion+ MCP server (Motion+ members)\n\nNo API key needed. After adding the Motion+ server, sign in to motion-plus\nfrom your agent's MCP menu.`
+            `motion-ai ${VERSION}\n\nInstall the Motion AI Kit (skills + hosted MCP server) into your AI agents.\n\nUsage:  npx motion-ai           the /motion skill + the free Motion MCP server\n        npx motion-ai --plus    the Motion+ MCP server instead (Motion+ members)\n\nMotion's skills are served by the MCP server, so they stay current without\nre-running this. No API key needed. With --plus, sign in to the motion server\nfrom your agent's MCP menu.`
         )
         return
     }
@@ -87,14 +88,29 @@ async function main(): Promise<void> {
     folders = [...new Set(folders)]
     if (folders.length === 0) bail("No agents selected.")
 
+    // ── 3. Claude Code plan ──
+    // Claude Code lists MCP skills on personal plans. On Team and Enterprise
+    // plans they are off unless an administrator turns them on, so those
+    // installs also get local stubs that read the served skills.
+    let claudeListsMcpSkills = true
+    if (folders.includes(".claude")) {
+        const team = await confirm({
+            message: "Is Claude Code on a Team or Enterprise plan?",
+            initialValue: false,
+        })
+        if (isCancel(team)) bail()
+        claudeListsMcpSkills = !team
+    }
+    const stubFolders = stubFoldersFor(folders, claudeListsMcpSkills)
+
     // ── Confirmation ──
     const base = baseDir(scope as Scope)
     note(
         [
             `Scope    ${scope as string}  →  ${base}`,
             `Agents   ${folders.join("  ")}`,
-            `Skills   install the Motion AI Kit skills`,
-            `MCP      ${servers.map((s) => s.name).join(" + ")} (hosted — no API key)`,
+            `Skills   the /motion skill${stubFolders.length ? `, plus local links to the served skills for ${stubFolders.join("  ")}` : ""}`,
+            `MCP      motion → ${servers[0].url} (hosted, no API key)`,
         ].join("\n"),
         "Review"
     )
@@ -104,12 +120,12 @@ async function main(): Promise<void> {
     // ── Install ──
     const sp = spinner()
     sp.start("Installing skills")
-    const skills = writeSkills(base, folders)
+    const skills = writeSkills(base, folders, stubFolders)
     const extras = writeAgentExtras(base, folders)
     sp.stop(`Installed ${skills.length} skill(s)`)
 
     const sp2 = spinner()
-    sp2.start("Configuring MCP servers")
+    sp2.start("Configuring the MCP server")
     const mcp = await configureMcp(scope as Scope, folders, servers)
     sp2.stop(
         mcp.configured.length
@@ -130,9 +146,9 @@ async function main(): Promise<void> {
     }
 
     outro(
-        plus
-            ? "Done. Run /motion in your agent, then sign in to motion-plus from its MCP menu."
-            : "Done. Run /motion in your agent. Motion+ members: run npx motion-ai --plus to add the Motion+ server."
+        mcp.plus.length
+            ? "Done. Sign in to the motion server from your agent's MCP menu, then run /motion or just ask."
+            : "Done. Run /motion in your agent, or just ask. Motion+ members: run npx motion-ai --plus."
     )
 }
 

@@ -97,15 +97,17 @@ npx motion-ai
 
 Choose a scope (this project or global) and one or more agents. The installer then:
 
-- Copies the Motion skills into each agent's folder, for example `.claude/skills/`. For Codex, skills go to `.agents/skills/` and MCP configuration to `.codex/config.toml`.
-- Adds the two hosted MCP servers:
+- Copies the `/motion` skill into each agent's folder, for example `.claude/skills/`. For Codex, skills go to `.agents/skills/` and MCP configuration to `.codex/config.toml`.
+- Adds one hosted MCP server, named `motion`:
 
-| Server        | URL                           | Access                          |
-| ------------- | ----------------------------- | ------------------------------- |
-| `motion`      | `https://mcp.motion.dev`      | Free                            |
-| `motion-plus` | `https://mcp.motion.dev/plus` | Motion+, sign in with OAuth     |
+| Command                | URL                           | Access                      |
+| ---------------------- | ----------------------------- | --------------------------- |
+| `npx motion-ai`        | `https://mcp.motion.dev`      | Free                        |
+| `npx motion-ai --plus` | `https://mcp.motion.dev/plus` | Motion+, sign in with OAuth |
 
-To use Motion+ features, open your agent's MCP menu and sign in to `motion-plus`. Your agent gives you a link. Nothing gets pasted into chat.
+The Motion+ server has everything the free server has, so `--plus` replaces the free server rather than adding a second one. It also removes the `motion-plus` server that older versions added. To use Motion+ features, open your agent's MCP menu and sign in to `motion`. Your agent gives you a link. Nothing gets pasted into chat.
+
+Motion's skills (animate, modal, performance audit and more) are served by the MCP server, so they stay current without re-running the installer. Agents that list MCP skills show them as `motion:<skill>`. For agents that do not (Codex, Cursor, and Claude Code on Team and Enterprise plans), the installer also adds a small local skill for each one, which reads the served skill.
 
 ### Cursor
 
@@ -113,13 +115,12 @@ Open **Customize** from the sidebar, search the marketplace for **Motion** and i
 
 ### Manual setup
 
-If your agent is not in the list, add the servers yourself:
+If your agent is not in the list, add the server yourself. Motion+ members use `https://mcp.motion.dev/plus` as the URL.
 
 ```json
 {
   "mcpServers": {
-    "motion": { "type": "http", "url": "https://mcp.motion.dev" },
-    "motion-plus": { "type": "http", "url": "https://mcp.motion.dev/plus" }
+    "motion": { "type": "http", "url": "https://mcp.motion.dev" }
   }
 }
 ```

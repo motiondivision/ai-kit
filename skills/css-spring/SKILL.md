@@ -1,3 +1,8 @@
+---
+name: css-spring
+description: "Generate a CSS spring or bounce easing as a linear() function. Use when the user asks for a spring, a bounce, a bouncier or springier easing, or a linear() curve in CSS."
+---
+
 # Generate a CSS spring or bounce
 
 Springs and bounces are not native CSS easings, so Motion approximates them by
